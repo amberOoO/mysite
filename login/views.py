@@ -15,11 +15,11 @@ def loginVerify(request):
 
         if(info.passwd == data['loginPassword']):
             #登录成功
-            sendBack = {'nickName': info.nickName, 'pwd': info.passwd, 'statusCode': '0'}
+            sendBack = {'nickName': info.nickName, 'phoneNumber': info.phoneNumber, 'pwd': info.passwd, 'statusCode': '0'}
             return JsonResponse(sendBack)
         else:
-            #密码成功
-            sendBack = {'nickName': info.nickName, 'pwd': info.passwd, 'statusCode': '2'}
+            #密码不正确
+            sendBack = {'nickName': info.nickName, 'phoneNumber': info.phoneNumber, 'pwd': info.passwd, 'statusCode': '2'}
             return JsonResponse(sendBack)
     except:
         #用户电话不存在

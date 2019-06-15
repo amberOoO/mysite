@@ -137,7 +137,7 @@
             'email':$('#registerEmail').val()
           };
           $.ajax({
-            url: "{% url 'login:loginVerify' %}",
+            url: "{% url 'login:register' %}",
             //请求的url地址
             type:"post",
             //请求方式
@@ -197,7 +197,7 @@
               'loginPassword': $pwd.val()
             };
           $.ajax({
-            url: "login/loginVerify",
+            url: "{% url 'login:loginVerify' %}",
             //请求的url地址
             type:"post",
             //请求方式
@@ -226,6 +226,10 @@
                 path: '/'
               });
               $.cookie('nickName', data['nickName'], {
+                expires: 1,
+                path: '/'
+              });
+              $.cookie('phoneNumber', data['phoneNumber'], {
                 expires: 1,
                 path: '/'
               });
@@ -266,6 +270,7 @@
 
       function cookieClear() {
         $.cookie('nickName',null,{path:'/'});
+        $.cookie('phoneNumber',null,{path:'/'});
         $.cookie('password',null,{path:'/'});
         $.cookie('loginStatus','0',{expires:1,path:'/'});
       };

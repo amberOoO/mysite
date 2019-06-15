@@ -47,7 +47,6 @@
                     //var fs = document.getElementById('forms');
                     var fd = new FormData($('#forms')[0]);
                     alert(fd);
-                    console.log();
                     $.ajax({
                         url: "{% url 'affair:processSubmit' %}",
                         type: "POST",
