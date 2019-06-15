@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="cn">
 <head>
@@ -11,7 +12,9 @@
         <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/locales/zh.js"></script>
         <link href="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/css/fileinput.css" rel="stylesheet"/>
         <script type="text/javascript">
+            //初始化fileinput
             $(function () {
+                //对多选的js操作
                 var config =
                     {
                         '.chosen-select': {},
@@ -28,25 +31,48 @@
                             width: "95%"
                         }
                     }
-
-
                 for (var selector in config) {
                     $(selector).chosen(config[selector]);
                 }
-
-
                 //0.初始化fileinput
                 var oFileInput = new FileInput();
-                oFileInput.Init("txt_file", "/api/OrderApi/ImportOrder");
+                oFileInput.Init("img_file", "/api/OrderApi/ImportOrder");
                 $("#uploadImg").click(function () {
                     $("#myModal").modal("show");
                 })
 
 
+                //提交创建的事务信息
+                $("#affairSubmit").click(function () {
+                    //var fs = document.getElementById('forms');
+                    var fd = new FormData($('#forms')[0]);
+                    alert(fd);
+                    console.log();
+                    $.ajax({
+                        url: "{% url 'affair:processSubmit' %}",
+                        type: "POST",
+                        data: fd,
+                        processData: false,  // 告诉jQuery不要去处理发送的数据
+                        contentType: false,   // 告诉jQuery不要去设置Content-Type请求头
+                        beforeSend: function (xhr, setting) {
+                                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                            },
+                        success: function (data) {
+                            if (data.res == '1') {
+
+                                {#window.location.href = "{% url "users:ini6" %}"#}
+                            } else {
+                                alert('提交失败');
+                            }
+                        }
+                    });
+                });
+
+
+
+
+
             })
-
-
-            //初始化fileinput
             var FileInput = function () {
                 var oFile = new Object();
 
@@ -59,7 +85,7 @@
                         language: 'zh', //设置语言
                         uploadUrl: uploadUrl, //上传的地址
                         allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
-                        showUpload: true, //是否显示上传按钮
+                        showUpload: false, //是否显示上传按钮
                         showCaption: false,//是否显示标题
                         browseClass: "btn btn-primary", //按钮样式
                         //dropZoneEnabled: false,//是否显示拖拽区域
@@ -69,7 +95,7 @@
                         //maxImageHeight: 1000,//图片的最大高度
                         //maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
                         //minFileCount: 0,
-                        maxFileCount: 10, //表示允许同时上传的最大文件个数
+                        maxFileCount: 2, //表示允许同时上传的最大文件个数
                         enctype: 'multipart/form-data',
                         validateInitialCount: true,
                         previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
@@ -77,7 +103,7 @@
                     });
 
                     //导入文件上传完成之后的事件
-                    $("#txt_file").on("fileuploaded", function (event, data, previewId, index) {
+                    $("#img_file").on("fileuploaded", function (event, data, previewId, index) {
                         $("#myModal").modal("hide");
                         var data = data.response.lstOrderImport;
                         if (data == undefined) {
@@ -92,6 +118,10 @@
                 }
                 return oFile;
             };
+
+
+
+
         </script>
 
 
@@ -101,15 +131,15 @@
 
     <!--创建事务-->
     <div class="container">
-        <form>
+        <form id="forms">
             <div class="form-group">
                 <label for="affairName">事务名称</label>
-                <input type="text" class="form-control" id="affairName" placeholder="Jane Doe"/></div>
+                <input type="text" class="form-control" id="affairName" placeholder="Jane Doe" name="affairName"/></div>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="type">类别</label>
-                        <select class="form-control" id="type">
+                        <select class="form-control" id="type" name="type">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -121,7 +151,7 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="receiverNum">需要人手</label>
-                        <select class="form-control" id="receiverNum">
+                        <select class="form-control" id="receiverNum" name="receiverNum">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -136,14 +166,14 @@
                     <div class="form-group">
                         <label for="reward">酬劳</label>
                         <input type="checkbox" value="" id="isReward"/>
-                        <input type="text" class="form-control" id="reward" placeholder="Jane Doe"/></div>
+                        <input type="text" class="form-control" id="reward" placeholder="$50" name="reward"/></div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="tagSelect">多选</label>
                         <br/>
                         <select data-placeholder="tag" class="chosen-select form-control" multiple=""
-                                style="width:350px;height:34px;" tabindex="4" id="tagSelect">
+                                style="width:350px;height:34px;" tabindex="4" id="tagSelect" name="tag">
                             <option value="">请选择标签</option>
                             <option value="errand" hassubinfo="true">跑腿</option>
                             <option value="take-out" hassubinfo="true">外卖</option>
@@ -154,29 +184,30 @@
                     </div>
                 </div>
             </div>
-        </form>
-        <div class="form-group">
-            <label for="affairDetail">详细描述</label>
-            <textarea class="form-control" id="affairDetail" rows="6"></textarea>
-        </div>
-        <div class="form-group">
-            <button type="button" class="btn btn-info" id="uploadImg">上传图片</button>
-            <p class="help-block">上传和你事务相关的图片哦.</p></div>
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">请选择Excel文件</h4></div>
-                    <div class="modal-body">
-                        <a href="~/Data/ExcelTemplate/Order.xlsx" class="form-control" style="border:none;">下载导入模板</a>
-                        <input type="file" name="txt_file" id="txt_file" multiple="" class="file-loading"/></div>
+            <div class="form-group">
+                <label for="affairDetail">详细描述</label>
+                <textarea class="form-control" id="affairDetail" rows="6" name="affairDetail"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-info" id="uploadImg">上传图片</button>
+                <p class="help-block">上传和你事务相关的图片哦.</p></div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">请选择相关图片</h4></div>
+                        <div class="modal-body">
+                            <a href="{% static "picTemplate.png" %}" class="form-control" style="border:none;">下载导入模板</a>
+                            <input type="file" name="img_file" id="img_file" multiple="" class="file-loading"/></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <button type="button" class="btn btn-primary btn-lg btn-block">提交</button>
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="affairSubmit">提交</button>
+        </form>
     </div>
+
 
 </body>
 </html>

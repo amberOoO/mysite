@@ -137,7 +137,7 @@
             'email':$('#registerEmail').val()
           };
           $.ajax({
-            url: "login/register",
+            url: "{% url 'login:loginVerify' %}",
             //请求的url地址
             type:"post",
             //请求方式
