@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" />
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script type="text/javascript">
+      var flag = new Array(4);
+      //ready函数
+      $(function() {
+        //开启新界面，判断是否已经登录。即判断loginStatus
+        if($.cookie('loginStatus')=='1')
+        {
+          afterLogin();
+        }
+        else{
+          $.cookie('loginStatus','0',{expires:1,path:'/'});
+        }
+
+        //点击退出登录按钮
+        $("#unlogin").click(function () {
+
+            afterUnlogin();
+            warning('用户：'+$.cookie('nickName')+"已退出登录！");
+            cookieClear();
+        });
+
+        //点击弹出登录框按钮
+        $('#loginModalButton').click(function() {
+          $('#loginModal').modal('show');
+        });
+
+        $('#loginButton').click(function(){
+          var $loginPhoneNumber = $('#loginPhoneNumber');
+          var $pwd = $('#loginPassword');
+
+          if ($loginPhoneNumber.val() == "") {
+            warning('登录号码不能为空');
+            return;
+          }
+          if ($loginPhoneNumber.val().length != 11) {
+            warning('号码不正确');
+            return;
+          }
+
+          if ($pwd.val() == "") {
+            warning('密码错误');
+            return;
+          }
+          var loginData = {
+              'loginPhoneNumber': $loginPhoneNumber.val(),
+              'loginPassword': $pwd.val()
+            };
+          $.ajax({
+            url: "login/loginVerify",
+            //请求的url地址
+            type:"post",
+            //请求方式
+            dataType: "json",
+            //返回格式为json
+            async: true,
+            //请求是否异步，默认为异步，这也是ajax重要特性
+            data: JSON.stringify(loginData),
+            //参数值
+            beforeSend: function() {
+              //请求前的处理
+            },
+            success: function(data) {
+              if (data['statusCode'] == "1") //1为电话不存在
+              {
+                warning('用户不存在');
+                return;
+              } else if (data['statusCode'] == "2") //2为密码错误
+              {
+                warning('密码错误');
+                return;
+              }
+
+              $.cookie('loginStatus', '1', {
+                expires: 1,
+                path: '/'
+              });
+              $.cookie('nickName', data['nickName'], {
+                expires: 1,
+                path: '/'
+              });
+              $.cookie('password', data['pwd'], {
+                expires: 1,
+                path: '/'
+              });
+
+              afterLogin();
+              warning(data['nickName']+'登陆成功！！');
+            },
+            complete: function() {
+              //请求完成的处理
+            },
+            error: function() {
+              //请求出错处理
+              warning('请求出错');
+            }
+          })
+
+        });
+
+        var errMsg;
+
+
+        $.each($("#registerForm input"), function (i, val) {
+           $(val).blur(function () {
+             if ($(val).attr("name") == "nickName") {
+               $(".nickMsg").remove();
+               var nickName = val.value;
+               var regName = /[\u4e00-\u9fa5]{2,6}/
+               if (nickName == "" || nickName.trim() == "") {
+                 errMsg = "<span class='nickMsg' style='color:red;'>昵称不能为空</span>";
+                 flag[0]=0;
+               }  else {
+                 errMsg = "<span class='nickMsg' style='color:red;'>OK！</span>";
+                 flag[0]=1;
+               }
+               $(this).parent().append(errMsg);
+             } else if ($(val).attr("name") == "email") {
+               $(".emailMsg").remove();
+               var email = val.value;
+               var regEmail = /^\w+@\w+((\.\w+)+)$/;
+               if (email == "" || email.trim() == "") {
+                 errMsg = "<span class='emailMsg' style='color:red;'>邮箱不能为空</span>";
+                 flag[1]=0;
+               } else if (!regEmail.test(email)) {
+                 errMsg = "<span class='emailMsg' style='color:red;'>邮箱账号@域名。如good@tom.com、whj@sina.com.cn</span>";
+                 flag[1]=0;
+               } else {
+                 errMsg = "<span class='emailMsg' style='color:red;'>OK！</span>";
+                 flag[1]=1;
+               }
+               $(this).parent().append(errMsg);
+             } else if ($(val).attr("name") == "pwd") {
+               $(".pwdMsg").remove();
+               var pwd = val.value;
+               var regPwd = /^\w{4,10}$/;
+               if (pwd == "" || pwd.trim() == "") {
+                 errMsg = "<span class='pwdMsg' style='color:red;'>密码不能为空</span>";
+                 flag[2]=0;
+               } else if (!regPwd.test(pwd)) {
+                 errMsg = "<span class='pwdMsg' style='color:red;'>格式错误</span>";
+                 flag[2]=0;
+               } else {
+                 errMsg = "<span class='pwdMsg' style='color:red;'>OK！</span>";
+               }
+               $(this).parent().append(errMsg);
+             } else if ($(val).attr("name") == "pwd2") {
+               $(".pwd2Msg").remove();
+               var pwd2 = $("#registerPwd2").val();
+               var pwd = $("#registerPwd1").val();
+               if (pwd2 == "" || pwd2.trim() == "" || pwd2 != pwd) {
+                 errMsg = "<span class='pwd2Msg' style='color:red;'>两次输入密码不一致</span>";
+                 flag[2]=0;
+               } else {
+                 errMsg = "<span class='pwd2Msg' style='color:red;'>OK！</span>";
+                 flag[2]=1;
+               }
+               $(this).parent().append(errMsg);
+             } else if ($(val).attr("name") == "phone") {
+               $(".phoneMsg").remove();
+               var phone = val.value;
+               var regPhone = /[13,15,18]\d{9}/;
+               if (phone == "" || phone.trim() == "") {
+                 errMsg = "<span class = 'phoneMsg' style = 'color:red;' > 手机号不能为空 </span>";
+                 flag[3]=0;
+               } else if (!regPhone.test(phone)) {
+                 errMsg = "<span class = 'phoneMsg' style = 'color:red;' > 格式错误 </span>";
+                 flag[3]=0;
+               } else {
+                 errMsg = "<span class = 'phoneMsg' style = 'color:red;' > OK！ </span>";
+                 flag[3]=1;
+               }
+               $(this).parent().append(errMsg);
+             }
+             if(flag[0]&&flag[1]&&flag[2]&&flag[3])
+             {
+               $('#registerSubmit').removeClass('btn-default');
+               $('#registerSubmit').addClass('btn-primary');
+               $('#registerSubmit').removeClass('disabled');
+             }
+             else
+             {
+               $('#registerSubmit').addClass('btn-default');
+               $('#registerSubmit').removeClass('btn-primary');
+               $('#registerSubmit').addClass('disabled');
+             }
+           });
+
+
+     });
+
+        $('#registerSubmit').click(function () {
+          if($(this).hasClass('btn-default'))return;
+          var registerData = {
+            'nickName':$('#registerNickName').val(),
+            'pwd':$('#registerPwd2').val(),
+            'phone':$('#registerPhone').val(),
+            'email':$('#registerEmail').val()
+          };
+          $.ajax({
+            url: "login/register",
+            //请求的url地址
+            type:"post",
+            //请求方式
+            dataType: "json",
+            //返回格式为json
+            async: true,
+            //请求是否异步，默认为异步，这也是ajax重要特性
+            data: JSON.stringify(registerData),
+            //参数值
+            beforeSend: function() {
+              //请求前的处理
+            },
+            success: function(data) {
+              warning(data['content']);
+
+            },
+            complete: function() {
+              //请求完成的处理
+            },
+            error: function() {
+              //请求出错处理
+              warning('请求出错');
+            }
+          })
+        })
+
+
+      });
+
+      //其他函数
+      function warning(content) {
+        $('#warningContent').html('<h1>' + content + '</h1>');
+        $('#loginModal').modal('hide');
+        $('#warning').modal('show');
+      }
+
+      function afterLogin()
+      {
+        $('#loginBefore').addClass('hide');
+        $('#userInfoNickName').html('欢迎你：'+$.cookie('nickName'));
+        $('#loginAfter').removeClass('hide');
+        $('#loginModal').modal('hide');
+      }
+
+      function afterUnlogin()
+      {
+        $('#loginBefore').removeClass('hide');
+        $('#userInfoNickName').html('欢迎你：'+$.cookie('nickName'));
+        $('#loginAfter').addClass('hide');
+      }
+
+      function cookieClear() {
+        $.cookie('nickName',null,{path:'/'});
+        $.cookie('password',null,{path:'/'});
+        $.cookie('loginStatus','0',{expires:1,path:'/'});
+      }
+
+
+    </script>
+  <title>Title</title>
+ </head>
+ <body>
+  <nav class="navbar navbar-default">
+   <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+     <a class="navbar-brand" href="#">Brand</a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+     <ul class="nav navbar-nav">
+      <li class="active"> <a href="#">Link <span class="sr-only">(current)</span></a> </li>
+      <li> <a href="#">Link</a></li>
+      <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+       <ul class="dropdown-menu">
+        <li> <a href="#">Action</a></li>
+        <li> <a href="#">Another action</a></li>
+        <li> <a href="#">Something else here</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#">Separated link</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#">One more separated link</a></li>
+       </ul> </li>
+     </ul>
+     <!--start简单搜索框-->
+     <form class="navbar-form navbar-left" id="nav_login_after">
+      <div class="form-group">
+       <input type="text" class="form-control" placeholder="Search" />
+      </div>
+      <button type="submit" class="btn btn-default">Submit</button>
+     </form>
+     <!--end简单搜索框end-->
+     <!--start登录之前的显示-->
+     <ul class="nav navbar-nav navbar-right" id="loginBefore">
+      <li> <a href="#" id="loginModalButton">登录咯！</a></li>
+     </ul>
+     <!--end登录之前的显示-->
+     <!--start登录之后的显示-->
+     <ul class="nav navbar-nav navbar-right hide" id="loginAfter">
+      <li> <a href="#" id="userInfoNickName">NickName</a></li>
+      <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+       <ul class="dropdown-menu">
+        <li> <a href="#">Action</a></li>
+        <li> <a href="#">Another action</a></li>
+        <li> <a href="#">Something else here</a></li>
+        <li> <a href="affair/createAffair" id="createAffair">创建事务</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#" id="unlogin">退出登录</a></li>
+       </ul> </li>
+     </ul>
+     <!--end登录之后的显示-->
+    </div>
+    <!-- /.navbar-collapse -->
+   </div>
+  </nav>
+  <button class="btn btn-primary" data-toggle="modal" data-target="#warning">弹出模态框</button>
+  <!--登录界面-->
+  <div id="loginModal" class="modal fade">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span> </button>
+     </div>
+     <div class="modal-title">
+      <h1 class="text-center">登录</h1>
+     </div>
+     <div class="modal-body">
+      <form class="form-group" action="">
+       <div class="form-group">
+        <label for="loginPhoneNumber">电话号码</label>
+        <input class="form-control" type="text" placeholder="" id="loginPhoneNumber" />
+       </div>
+       <div class="form-group">
+        <label for="loginPassword">密码</label>
+        <input class="form-control" type="password" placeholder="" id="loginPassword" />
+       </div>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#registerModal">还没有账号？点我注册</a>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#forget">忘记密码</a>
+       <div class="text-right">
+        <button class="btn btn-primary" type="button" id="loginButton">登录</button>
+        <button class="btn btn-danger" data-dismiss="modal">取消</button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!-- 注册窗口 -->
+  <div id="registerModal" class="modal fade" tabindex="-1">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span></button>
+     </div>
+     <div class="modal-title">
+      <h1 class="text-center">注册</h1>
+     </div>
+     <div class="modal-body">
+      <form class="form-group" action="" id="registerForm">
+       <div class="form-group">
+        <label for="registerNickName">昵称</label>
+        <input class="form-control" type="text" placeholder="6-15位字母或数字" name="nickName" id="registerNickName" />
+       </div>
+       <div class="form-group">
+        <label for="registerPwd1">密码</label>
+        <input class="form-control" type="password" placeholder="至少6位字母或数字" name="pwd1" id="registerPwd1" />
+       </div>
+       <div class="form-group">
+        <label for="registerPwd2">再次输入密码</label>
+        <input class="form-control" type="password" placeholder="至少6位字母或数字" name="pwd2" id="registerPwd2" />
+       </div>
+       <div class="form-group">
+        <label for="registerPhone">手机号码</label>
+        <input class="form-control" type="text" placeholder="例如:18866666666" name="phone" id="registerPhone" />
+       </div>
+       <div class="form-group">
+        <label for="registerEmail">邮箱</label>
+        <input class="form-control" type="email" placeholder="例如:123@123.com" name="email" id="registerEmail" />
+       </div>
+       <div class="text-right" id="registerButtonGroup">
+        <button class="btn btn-default disabled" type="button" id="registerSubmit">提交</button>
+        <button class="btn btn-danger" data-dismiss="modal">取消</button>
+       </div>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#loginModal">已有账号？点我登录</a>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!--警告界面-->
+  <div class="modal fade" id="warning">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span> </button>
+     </div>
+     <div class="modal-title">
+      <div class="container">
+       提醒
+      </div>
+     </div>
+     <div class="modal-body">
+      <div class="container">
+       <h4 id="warningContent"></h4>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

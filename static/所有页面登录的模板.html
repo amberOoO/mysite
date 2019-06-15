@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" />
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script type="text/javascript" src="/static/js/login.js"></script>
+  <script type="text/javascript">
+
+  </script>
+  <title>Title</title>
+ </head>
+ <body>
+  <nav class="navbar navbar-default">
+   <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+     <a class="navbar-brand" href="#">Brand</a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+     <ul class="nav navbar-nav">
+      <li class="active"> <a href="#">Link <span class="sr-only">(current)</span></a> </li>
+      <li> <a href="#">Link</a></li>
+      <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+       <ul class="dropdown-menu">
+        <li> <a href="#">Action</a></li>
+        <li> <a href="#">Another action</a></li>
+        <li> <a href="#">Something else here</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#">Separated link</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#">One more separated link</a></li>
+       </ul> </li>
+     </ul>
+     <!--start简单搜索框-->
+     <form class="navbar-form navbar-left" id="nav_login_after">
+      <div class="form-group">
+       <input type="text" class="form-control" placeholder="Search" />
+      </div>
+      <button type="submit" class="btn btn-default">Submit</button>
+     </form>
+     <!--end简单搜索框end-->
+     <!--start登录之前的显示-->
+     <ul class="nav navbar-nav navbar-right" id="loginBefore">
+      <li> <a href="#" id="loginModalButton">登录咯！</a></li>
+     </ul>
+     <!--end登录之前的显示-->
+     <!--start登录之后的显示-->
+     <ul class="nav navbar-nav navbar-right hide" id="loginAfter">
+      <li> <a href="#" id="userInfoNickName">NickName</a></li>
+      <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+       <ul class="dropdown-menu">
+        <li> <a href="#">Action</a></li>
+        <li> <a href="#">Another action</a></li>
+        <li> <a href="#">Something else here</a></li>
+        <li> <a href="affair/createAffair" id="createAffair">创建事务</a></li>
+        <li role="separator" class="divider"></li>
+        <li> <a href="#" id="unlogin">退出登录</a></li>
+       </ul> </li>
+     </ul>
+     <!--end登录之后的显示-->
+    </div>
+    <!-- /.navbar-collapse -->
+   </div>
+  </nav>
+  <button class="btn btn-primary" data-toggle="modal" data-target="#warning">弹出模态框</button>
+  <!--登录界面-->
+  <div id="loginModal" class="modal fade">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span> </button>
+     </div>
+     <div class="modal-title">
+      <h1 class="text-center">登录</h1>
+     </div>
+     <div class="modal-body">
+      <form class="form-group" action="" id="loginForm">
+       <div class="form-group">
+        <label for="loginPhoneNumber">电话号码</label>
+        <input class="form-control" type="text" placeholder="" id="loginPhoneNumber" />
+       </div>
+       <div class="form-group">
+        <label for="loginPassword">密码</label>
+        <input class="form-control" type="password" placeholder="" id="loginPassword" />
+       </div>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#registerModal">还没有账号？点我注册</a>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#forget">忘记密码</a>
+       <div class="text-right">
+        <button class="btn btn-primary" type="button" id="loginButton">登录</button>
+        <button class="btn btn-danger" data-dismiss="modal">取消</button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!-- 注册窗口 -->
+  <div id="registerModal" class="modal fade" tabindex="-1">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span></button>
+     </div>
+     <div class="modal-title">
+      <h1 class="text-center">注册</h1>
+     </div>
+     <div class="modal-body">
+      <form class="form-group" action="" id="registerForm">
+       <div class="form-group">
+        <label for="registerNickName">昵称</label>
+        <input class="form-control" type="text" placeholder="6-15位字母或数字" name="nickName" id="registerNickName" />
+       </div>
+       <div class="form-group">
+        <label for="registerPwd1">密码</label>
+        <input class="form-control" type="password" placeholder="至少6位字母或数字" name="pwd1" id="registerPwd1" />
+       </div>
+       <div class="form-group">
+        <label for="registerPwd2">再次输入密码</label>
+        <input class="form-control" type="password" placeholder="至少6位字母或数字" name="pwd2" id="registerPwd2" />
+       </div>
+       <div class="form-group">
+        <label for="registerPhone">手机号码</label>
+        <input class="form-control" type="text" placeholder="例如:18866666666" name="phone" id="registerPhone" />
+       </div>
+       <div class="form-group">
+        <label for="registerEmail">邮箱</label>
+        <input class="form-control" type="email" placeholder="例如:123@123.com" name="email" id="registerEmail" />
+       </div>
+       <div class="text-right" id="registerButtonGroup">
+        <button class="btn btn-default disabled" type="button" id="registerSubmit">提交</button>
+        <button class="btn btn-danger" data-dismiss="modal">取消</button>
+       </div>
+       <a href="" data-toggle="modal" data-dismiss="modal" data-target="#loginModal">已有账号？点我登录</a>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!--警告界面-->
+  <div class="modal fade" id="warning">
+   <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+      <button class="close" data-dismiss="modal"> <span>&times;</span> </button>
+     </div>
+     <div class="modal-title">
+      <div class="container">
+       提醒
+      </div>
+     </div>
+     <div class="modal-body">
+      <div class="container">
+       <h4 id="warningContent"></h4>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+        <!--额外引入-->
+        <!--用来传图片-->
+        <link href="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.css" rel="stylesheet"/>
+        <script src="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.jquery.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/fileinput.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/locales/zh.js"></script>
+        <link href="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/css/fileinput.css" rel="stylesheet"/>
+        <script type="text/javascript">
+            $(function () {
+                var config =
+                    {
+                        '.chosen-select': {},
+                        '.chosen-select-deselect': {
+                            allow_single_deselect: true
+                        },
+                        '.chosen-select-no-single': {
+                            disable_search_threshold: 10
+                        },
+                        '.chosen-select-no-results': {
+                            no_results_text: 'Oops, nothing found!'
+                        },
+                        '.chosen-select-width': {
+                            width: "95%"
+                        }
+                    }
+
+
+                for (var selector in config) {
+                    $(selector).chosen(config[selector]);
+                }
+
+
+                //0.初始化fileinput
+                var oFileInput = new FileInput();
+                oFileInput.Init("txt_file", "/api/OrderApi/ImportOrder");
+                $("#uploadImg").click(function () {
+                    $("#myModal").modal("show");
+                })
+
+
+            })
+
+
+            //初始化fileinput
+            var FileInput = function () {
+                var oFile = new Object();
+
+                //初始化fileinput控件（第一次初始化）
+                oFile.Init = function (ctrlName, uploadUrl) {
+                    var control = $('#' + ctrlName);
+
+                    //初始化上传控件的样式
+                    control.fileinput({
+                        language: 'zh', //设置语言
+                        uploadUrl: uploadUrl, //上传的地址
+                        allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
+                        showUpload: true, //是否显示上传按钮
+                        showCaption: false,//是否显示标题
+                        browseClass: "btn btn-primary", //按钮样式
+                        //dropZoneEnabled: false,//是否显示拖拽区域
+                        //minImageWidth: 50, //图片的最小宽度
+                        //minImageHeight: 50,//图片的最小高度
+                        //maxImageWidth: 1000,//图片的最大宽度
+                        //maxImageHeight: 1000,//图片的最大高度
+                        //maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
+                        //minFileCount: 0,
+                        maxFileCount: 10, //表示允许同时上传的最大文件个数
+                        enctype: 'multipart/form-data',
+                        validateInitialCount: true,
+                        previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+                        msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                    });
+
+                    //导入文件上传完成之后的事件
+                    $("#txt_file").on("fileuploaded", function (event, data, previewId, index) {
+                        $("#myModal").modal("hide");
+                        var data = data.response.lstOrderImport;
+                        if (data == undefined) {
+                            toastr.error('文件格式类型不正确');
+                            return;
+                        }
+                        //1.初始化表格
+                        var oTable = new TableInit();
+                        oTable.Init(data);
+                        $("#div_startimport").show();
+                    });
+                }
+                return oFile;
+            };
+        </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+    <!--创建事务-->
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="affairName">事务名称</label>
+                <input type="text" class="form-control" id="affairName" placeholder="Jane Doe"/></div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="type">类别</label>
+                        <select class="form-control" id="type">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="receiverNum">需要人手</label>
+                        <select class="form-control" id="receiverNum">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="reward">酬劳</label>
+                        <input type="checkbox" value="" id="isReward"/>
+                        <input type="text" class="form-control" id="reward" placeholder="Jane Doe"/></div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="tagSelect">多选</label>
+                        <br/>
+                        <select data-placeholder="tag" class="chosen-select form-control" multiple=""
+                                style="width:350px;height:34px;" tabindex="4" id="tagSelect">
+                            <option value="">请选择标签</option>
+                            <option value="errand" hassubinfo="true">跑腿</option>
+                            <option value="take-out" hassubinfo="true">外卖</option>
+                            <option value="express" hassubinfo="true">快递</option>
+                            <option value="tutor" hassubinfo="true">辅导</option>
+                            <option value="findGroup" hassubinfo="true">组队</option>
+                        </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="form-group">
+            <label for="affairDetail">详细描述</label>
+            <textarea class="form-control" id="affairDetail" rows="6"></textarea>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-info" id="uploadImg">上传图片</button>
+            <p class="help-block">上传和你事务相关的图片哦.</p></div>
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">请选择Excel文件</h4></div>
+                    <div class="modal-body">
+                        <a href="~/Data/ExcelTemplate/Order.xlsx" class="form-control" style="border:none;">下载导入模板</a>
+                        <input type="file" name="txt_file" id="txt_file" multiple="" class="file-loading"/></div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg btn-block">提交</button>
+    </div>
+
+
+
+</body>
+</html>
