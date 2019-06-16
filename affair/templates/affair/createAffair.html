@@ -36,7 +36,7 @@
                 }
                 //0.初始化fileinput
                 var oFileInput = new FileInput();
-                oFileInput.Init("img_file", "/api/OrderApi/ImportOrder");
+                oFileInput.Init("img_file", "{% url 'affair:processSubmit' %}");
                 $("#uploadImg").click(function () {
                     $("#myModal").modal("show");
                 })
@@ -87,6 +87,14 @@
                         showUpload: false, //是否显示上传按钮
                         showCaption: false,//是否显示标题
                         browseClass: "btn btn-primary", //按钮样式
+                        uploadAsync: false,
+                        layoutTemplates: {
+                            // actionDelete:'', //去除上传预览的缩略图中的删除图标
+                            actionUpload: '',//去除上传预览缩略图中的上传图片；
+                            actionZoom: '',   //去除上传预览缩略图中的查看详情预览的缩略图标。
+                            footer: '<div class="file-thumbnail-footer">\n' +
+                            '<div class="file-caption-name" style="width:{width}">{caption}</div>\n'+'{progress} {actions}\n' +'</div>',
+                        },
                         //dropZoneEnabled: false,//是否显示拖拽区域
                         //minImageWidth: 50, //图片的最小宽度
                         //minImageHeight: 50,//图片的最小高度
@@ -199,7 +207,8 @@
                             <h4 class="modal-title" id="myModalLabel">请选择相关图片</h4></div>
                         <div class="modal-body">
                             <a href="{% static "picTemplate.png" %}" class="form-control" style="border:none;">下载导入模板</a>
-                            <input type="file" name="img_file" id="img_file" multiple="" class="file-loading"/></div>
+                            <input type="file" name="img_file" id="img_file" class="file" multiple="multiple" />
+                        </div>
                     </div>
                 </div>
             </div>

@@ -151,6 +151,7 @@
               //请求前的处理
             },
             success: function(data) {
+
               warning(data['content']);
 
             },

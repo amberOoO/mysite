@@ -157,7 +157,7 @@
             'email':$('#registerEmail').val()
           };
           $.ajax({
-            url: "login/register",
+            url: "http://{{ request.META.HTTP_HOST }}/login/register",
             //请求的url地址
             type:"post",
             //请求方式
@@ -167,8 +167,8 @@
             //请求是否异步，默认为异步，这也是ajax重要特性
             data: JSON.stringify(registerData),
             //参数值
-            beforeSend: function() {
-              //请求前的处理
+            beforeSend: function (xhr, setting) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
             },
             success: function(data) {
               warning(data['content']);
@@ -176,6 +176,7 @@
             },
             complete: function() {
               //请求完成的处理
+                $("#registerModal").modal('hide');
             },
             error: function() {
               //请求出错处理
@@ -217,7 +218,7 @@
               'loginPassword': $pwd.val()
             };
           $.ajax({
-            url: "login/loginVerify",
+            url: "http://{{ request.META.HTTP_HOST }}/login/loginVerify",
             //请求的url地址
             type:"post",
             //请求方式
@@ -227,8 +228,8 @@
             //请求是否异步，默认为异步，这也是ajax重要特性
             data: JSON.stringify(loginData),
             //参数值
-            beforeSend: function() {
-              //请求前的处理
+            beforeSend: function (xhr, setting) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
             },
             success: function(data) {
               if (data['statusCode'] == "1") //1为电话不存在

@@ -102,6 +102,7 @@
             </div>
             <div class="modal-body">
                 <form class="form-group" action="" id="registerForm">
+                    {{ csrf_token }}
                     <div class="form-group">
                         <label for="registerNickName">昵称</label>
                         <input class="form-control" type="text" placeholder="6-15位字母或数字" name="nickName"
