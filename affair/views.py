@@ -47,6 +47,7 @@ def processSubmit(request):
 
             affairInfo = AffairInfo(affairProviderId=accountInfo,
                                     type=data['type'],
+                                    affairName=data['affairName'],
                                     affairDetail=data['affairDetail'],
                                     affairCreateTime=timezone.now(),
                                     NeedReceiverNum=int(data['receiverNum'][0])

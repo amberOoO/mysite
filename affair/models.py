@@ -7,8 +7,9 @@ from django.db import models
 class AffairInfo(models.Model):
     affairId = models.BigAutoField(primary_key=True)
     affairProviderId = models.ForeignKey('login.AccountInfo', on_delete=models.CASCADE)
-    type = models.CharField(max_length=30)
-    tag = models.CharField(max_length=30, null=True, blank=True)
+    affairName = models.CharField(max_length=50)
+    type = models.CharField(max_length=50)
+    tag = models.CharField(max_length=50, null=True, blank=True)
     affairDetail = models.CharField(max_length=400, null=True, blank=True)
     affairCreateTime = models.DateTimeField()
     rewardType = models.CharField(max_length=1, default='0')  # 0代表奖励为钱，1代表是物品
