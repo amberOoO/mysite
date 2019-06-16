@@ -31,7 +31,6 @@ def createAffair(request):
         num.append(temp)
         temp=temp*2
 
-    print(tagDic)
     context = {'typeDic':typeDic,'num':num,'tag':tagDic}
     return render(request, 'affair/createAffair.html', context)
 
@@ -47,11 +46,28 @@ def processSubmit(request):
             print(accountInfo.phoneNumber)
 
             affairInfo = AffairInfo(affairProviderId=accountInfo,
-                                    type=data['type'][0],
+                                    type=data['type'],
                                     affairDetail=data['affairDetail'],
                                     affairCreateTime=timezone.now(),
                                     NeedReceiverNum=int(data['receiverNum'][0])
                                     )
+
+            if(data['reward']==''):
+                affairInfo.rewardType = '0'
+                affairInfo.rewardMoney = 0
+            else:
+                judge = '0'   #0代表全是数字，则判断酬劳为RMB
+                for c in data['reward']:
+                    if((c<='0' or c>='9') and c!='.'):
+                        judge = '1'
+                        break
+                affairInfo.rewardType = '0'
+                if(judge == '0'):
+                    affairInfo.rewardMoney = float(data['reward'])
+                    print(float(data['reward']))
+                else:
+                    affairInfo.rewardThing = data['reward']
+
 
             print(data.getlist('tag'))
             temp = ''
@@ -61,7 +77,6 @@ def processSubmit(request):
                 print(temp)
             affairInfo.tag = temp
             affairInfo.save()
-            print(request.FILES.getlist('img_file'))
 
             count = 0
             for imgFile in request.FILES.getlist('img_file'):
@@ -76,6 +91,8 @@ def processSubmit(request):
         if (result == '1' or result == '2'):
             sendBack = {'statusCode': result}
             return JsonResponse(sendBack)
+        sendBack = {'statusCode': '3'}
+        return JsonResponse(sendBack)
 
-    sendBack = {'statusCode': '3'}
+    print('图片来了？？？')
     return JsonResponse(sendBack)

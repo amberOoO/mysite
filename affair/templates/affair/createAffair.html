@@ -40,13 +40,9 @@
                 $("#uploadImg").click(function () {
                     $("#myModal").modal("show");
                 })
-
-
                 //提交创建的事务信息
                 $("#affairSubmit").click(function () {
                     //var fs = document.getElementById('forms');
-
-
                     var fd = new FormData($('#forms')[0]);
                     alert(fd);
                     $.ajax({
@@ -64,16 +60,13 @@
                                 $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
                                 $('#loginModal').modal('hide');
                                 $('#warning').modal('show');
-
                                 clock1 = setInterval(function () {
                                     delay = delay - 1;
                                     $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
                                 },1000);
-
                                 clock2 = setTimeout(function () {
-                                    window.location.replace("http://{{ request.META.HTTP_HOST }}");
+                                    //window.location.replace("http://{{ request.META.HTTP_HOST }}");
                                 },delay*1000);
-
                             }
                             if (data['statusCode'] == '1'||data['statusCode'] == '2') {
                                 warning('您的登录有问题，请重新登录');
@@ -82,7 +75,6 @@
                             if (data['statusCode'] == '3') {
                                 warning('因未知原因，创建失败！');
                             }
-
                         },
                         error: function() {
                             //请求出错处理
@@ -90,19 +82,12 @@
                         }
                     });
                 });
-
-
-
-
-
             })
             var FileInput = function () {
                 var oFile = new Object();
-
                 //初始化fileinput控件（第一次初始化）
                 oFile.Init = function (ctrlName, uploadUrl) {
                     var control = $('#' + ctrlName);
-
                     //初始化上传控件的样式
                     control.fileinput({
                         language: 'zh', //设置语言
@@ -115,7 +100,7 @@
                         layoutTemplates: {
                             // actionDelete:'', //去除上传预览的缩略图中的删除图标
                             actionUpload: '',//去除上传预览缩略图中的上传图片；
-                            actionZoom: '',   //去除上传预览缩略图中的查看详情预览的缩略图标。
+                            //actionZoom: '',   //去除上传预览缩略图中的查看详情预览的缩略图标。
                             footer: '<div class="file-thumbnail-footer">\n' +
                             '<div class="file-caption-name" style="width:{width}">{caption}</div>\n'+'{progress} {actions}\n' +'</div>',
                         },
@@ -132,7 +117,6 @@
                         previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
                         msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
                     });
-
                     //导入文件上传完成之后的事件
                     $("#img_file").on("fileuploaded", function (event, data, previewId, index) {
                         $("#myModal").modal("hide");
@@ -149,10 +133,6 @@
                 }
                 return oFile;
             };
-
-
-
-
         </script>
 
 
@@ -191,9 +171,8 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label for="reward">酬劳</label>
-                        <input type="checkbox" value="" id="isReward"/>
-                        <input type="text" class="form-control" id="reward" placeholder="$50" name="reward"/></div>
+                        <label for="reward">酬劳（若为RMB请直接填写数字，否则为物品交换），默认为“0”即无偿</label>
+                        <input type="text" class="form-control" id="reward" placeholder="例：“一只JackMa”，此自动识别为物品交换" name="reward"/></div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
@@ -221,10 +200,10 @@
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">请选择相关图片</h4></div>
+                            <h4 class="modal-title" id="myModalLabel">请选择至多2张图片（注意！！！请一次性导入）</h4></div>
                         <div class="modal-body">
                             <a href="{% static "picTemplate.png" %}" class="form-control" style="border:none;">下载导入模板</a>
-                            <input type="file" name="img_file" id="img_file" class="file" multiple="multiple" />
+                            <input type="file" name="img_file" id="img_file" class="file-loading" multiple="multiple" />
                         </div>
                     </div>
                 </div>
