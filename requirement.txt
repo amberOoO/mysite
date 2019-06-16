@@ -1,0 +1,8 @@
+certifi==2019.3.9
+Django==2.2.1
+mysqlclient==1.4.2.post1
+Pillow==6.0.0
+PyMySQL==0.9.3
+pytz==2019.1
+sqlparse==0.3.0
+wincertstore==0.2

@@ -45,6 +45,8 @@
                 //提交创建的事务信息
                 $("#affairSubmit").click(function () {
                     //var fs = document.getElementById('forms');
+
+
                     var fd = new FormData($('#forms')[0]);
                     alert(fd);
                     $.ajax({
@@ -57,12 +59,34 @@
                                 xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
                             },
                         success: function (data) {
-                            if (data.res == '1') {
+                            if (data['statusCode'] == '0') {
+                                var delay=5;
+                                $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                                $('#loginModal').modal('hide');
+                                $('#warning').modal('show');
 
-                                {#window.location.href = "{% url "users:ini6" %}"#}
-                            } else {
-                                alert('提交失败');
+                                clock1 = setInterval(function () {
+                                    delay = delay - 1;
+                                    $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                                },1000);
+
+                                clock2 = setTimeout(function () {
+                                    window.location.replace("http://{{ request.META.HTTP_HOST }}");
+                                },delay*1000);
+
                             }
+                            if (data['statusCode'] == '1'||data['statusCode'] == '2') {
+                                warning('您的登录有问题，请重新登录');
+                                afterUnlogin();
+                            }
+                            if (data['statusCode'] == '3') {
+                                warning('因未知原因，创建失败！');
+                            }
+
+                        },
+                        error: function() {
+                            //请求出错处理
+                            warning('请求出错');
                         }
                     });
                 });
@@ -141,29 +165,25 @@
         <form id="forms">
             <div class="form-group">
                 <label for="affairName">事务名称</label>
-                <input type="text" class="form-control" id="affairName" placeholder="Jane Doe" name="affairName"/></div>
+                <input type="text" class="form-control" id="affairName" placeholder="JackMa为什么那么强" name="affairName"/></div>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="type">类别</label>
                         <select class="form-control" id="type" name="type">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
+                            {% for typeValue,typeName in typeDic.items %}
+                            <option value="{{ typeValue }}">{{ typeName }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label for="receiverNum">需要人手</label>
+                        <label for="receiverNum">大概需要人手</label>
                         <select class="form-control" id="receiverNum" name="receiverNum">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
+                            {% for i in num %}
+                            <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -177,16 +197,13 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label for="tagSelect">多选</label>
+                        <label for="tagSelect">标签（多选）</label>
                         <br/>
-                        <select data-placeholder="tag" class="chosen-select form-control" multiple=""
+                        <select data-placeholder="请选择标签" class="chosen-select form-control" multiple=""
                                 style="width:350px;height:34px;" tabindex="4" id="tagSelect" name="tag">
-                            <option value="">请选择标签</option>
-                            <option value="errand" hassubinfo="true">跑腿</option>
-                            <option value="take-out" hassubinfo="true">外卖</option>
-                            <option value="express" hassubinfo="true">快递</option>
-                            <option value="tutor" hassubinfo="true">辅导</option>
-                            <option value="findGroup" hassubinfo="true">组队</option>
+                            {% for tagValue,tagName in tag.items %}
+                            <option value="{{ tagValue }}" hassubinfo="true">{{ tagName }}</option>
+                            {% endfor %}
                         </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </div>
                 </div>
