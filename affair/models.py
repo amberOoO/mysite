@@ -7,7 +7,7 @@ from django.db import models
 class AffairInfo(models.Model):
     affairId = models.BigAutoField(primary_key=True)
     affairProviderId = models.ForeignKey('login.AccountInfo', on_delete=models.CASCADE)
-    affairName = models.CharField(max_length=50)
+    affairName = models.CharField(max_length=50, default='null')
     type = models.CharField(max_length=50)
     tag = models.CharField(max_length=50, null=True, blank=True)
     affairDetail = models.CharField(max_length=400, null=True, blank=True)
@@ -18,11 +18,14 @@ class AffairInfo(models.Model):
     NeedReceiverNum = models.IntegerField()
     receiverNum = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.affairName
+
 
 class AffairImg(models.Model):
     affair = models.ForeignKey('affair.AffairInfo', on_delete=models.CASCADE)
     img = models.ImageField(upload_to='affairImg')
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name

@@ -12,3 +12,6 @@ class AccountInfo(models.Model):
     credit = models.FloatField(default=10)
     jurisdiction = models.CharField(max_length=1, default='1')
     nowJurisdiction = models.CharField(max_length=1, null=True, blank=True)
+
+    def __str__(self):
+        return self.phoneNumber
