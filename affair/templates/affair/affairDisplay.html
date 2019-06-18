@@ -14,8 +14,8 @@
               columnClasses: '', //add classes to items
               breakpoints:{
                 lg: 3,
-                md: 4,
-                sm: 6,
+                md: 3,
+                sm: 4,
                 xs: 6
               },
               distributeBy: { order: false, height: false, attr: 'data-order', attrOrder: 'asc' },
@@ -37,27 +37,41 @@
 <!--主题部分-->
 <div class="container">
 
-    <div class="row" id="my-gallery-container"><!-- 将要加入的略缩图放入row中 -->
+
+    {% if affairData %}
+        <div class="row" id="my-gallery-container"><!-- 将要加入的略缩图放入row中 -->
         {% for affair in affairData %}
-        <div>
-            <div class="thumbnail">
-                <!--start这是图片放置的位置-->
-                {% if affair.img %}
-                    <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive" width="400"/>
-                {% else %}
-                    <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive" width="400"/>
-                {% endif %}
-                <!--end这是图片放置的位置-->
-                <!--start这是文字描述放置的位置-->
-                    <div class="caption">
-                        <h4>Jackma3</h4>
-                        <p style="color:red;">1只皮卡丘</p>
-                    </div>
-                <!--end这是文字描述放置的位置-->
+            <div>
+                <div class="thumbnail">
+                    <!--start这是图片放置的位置-->
+                    {% if affair.img %}
+                        <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                    {% else %}
+                        <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                    {% endif %}
+                    <!--end这是图片放置的位置-->
+                    <!--start这是文字描述放置的位置-->
+                        <div class="caption">
+                            <h4>{{ affair.affairName }}</h4>
+                            <p style="color:red;"><span style="color:black;">类型：</span>{{ affair.type }}</p>
+                            {% if affair.tag %}
+                               <p style="color:red;"><span style="color:black;">标签：</span>{{ affair.tag }}</p>
+                            {% else %}
+                                <p style="color:red;"><span style="color:black;">标签：</span>暂无</p>
+                            {% endif %}
+
+                        </div>
+                    <!--end这是文字描述放置的位置-->
+                </div>
             </div>
-        </div>
         {% endfor %}
-    </div>
+        </div>
+
+    {% else %}
+        <div style="font-size:50px;text-align:center;">暂时没有需求哦</div>
+    {% endif %}
+
+
 
 </div>
 

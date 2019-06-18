@@ -32,7 +32,7 @@ def createAffair(request):
         num.append(temp)
         temp=temp*2
 
-    context = {'typeDic':typeDic,'num':num,'tag':tagDic}
+    context = {'typeDic':typeDic, 'num':num, 'tag':tagDic, "typeDic":typeDic}
     return render(request, 'affair/createAffair.html', context)
 
 
@@ -113,7 +113,7 @@ def affairDisplay(request, affairType):
     affairData = cursor.fetchall()
     print(affairData)
 
-    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png'}
+    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png', "typeDic":typeDic}
     return render(request, 'affair/affairDisplay.html', context)
 
 

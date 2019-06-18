@@ -6,7 +6,6 @@ from django.http import HttpResponse, JsonResponse
 import json
 from .models import *
 
-
 def loginVerify(request):
     data = json.loads(request.body)
     print(str(data['loginPhoneNumber']))

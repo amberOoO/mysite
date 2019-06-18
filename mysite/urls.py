@@ -23,8 +23,8 @@ from mysite.settings import MEDIA_ROOT
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/',include('login.urls')),
-    path('',index_views.index),
-    path('index/',index_views.index, name='index'),
-    path('affair/',include('affair.urls')),
+    path('', index_views.index),
+    path('index/',index_views.index, name='index',),
+    path('affair/',include('affair.urls'),name='affair'),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT}),
 ]

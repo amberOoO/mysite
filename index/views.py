@@ -4,7 +4,8 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from affair.views import typeDic
 
 def index(request):
-    context={}
-    return render(request,'index/index.html',context);
+    context={"typeDic": typeDic}
+    return render(request,'index/index.html', context);
