@@ -24,7 +24,7 @@
 
             warning('用户：'+$.cookie('nickName')+"已退出登录！");
             afterUnlogin();
-            window.location.replace("http://{{ request.META.HTTP_HOST }}");
+            window.location.replace("/index");
         });
 
         //直接按回车和输入同样效果
@@ -157,7 +157,7 @@
             'email':$('#registerEmail').val()
           };
           $.ajax({
-            url: "http://{{ request.META.HTTP_HOST }}/login/register",
+            url: "{% url "login:register" %}",
             //请求的url地址
             type:"post",
             //请求方式
@@ -218,7 +218,7 @@
               'loginPassword': $pwd.val()
             };
           $.ajax({
-            url: "http://{{ request.META.HTTP_HOST }}/login/loginVerify",
+            url: "{% url "login:loginVerify" %}",
             //请求的url地址
             type:"post",
             //请求方式

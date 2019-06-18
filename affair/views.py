@@ -6,24 +6,25 @@ from django.utils import timezone
 from affair.models import AffairImg, AffairInfo
 from login.models import AccountInfo
 from login.views import cookiesVerify
+import pymysql
 
+typeDic = {'study': '学习帮助',
+           'life': '日常帮助',
+           'restThing': '闲置物品',
+           'techNeed': '技术帮助',
+           'groupNeed': '组队需求',
+           'other': '其他'}
+
+tagDic = {'errand': '跑腿',
+          'takeOut': '外卖',
+          'express': '快递',
+          'tutor': '辅导',
+          'findGroup': '组队',
+          'competition': '竞赛',
+          'findTheOtherPart': '找伴',
+          'findFriend': '找伴'}
 
 def createAffair(request):
-    typeDic = {'study':'学习帮助',
-               'life':'日常帮助',
-               'restThing':'闲置物品',
-               'techNeed':'技术帮助',
-               'groupNeed':'组队需求',
-               'other':'其他'}
-
-    tagDic = {'errand':'跑腿',
-              'takeOut':'外卖',
-              'express':'快递',
-              'tutor':'辅导',
-              'findGroup':'组队',
-              'competition':'竞赛',
-              'findTheOtherPart':'找伴',
-              'findFriend':'找伴'}
 
     num = []
     temp = 1
@@ -67,6 +68,7 @@ def processSubmit(request):
                     affairInfo.rewardMoney = float(data['reward'])
                     print(float(data['reward']))
                 else:
+                    affairInfo.rewardType = '1'
                     affairInfo.rewardThing = data['reward']
 
 
@@ -97,3 +99,43 @@ def processSubmit(request):
 
     print('图片来了？？？')
     return JsonResponse(sendBack)
+
+
+def affairDisplay(request, affairType):
+    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    #为各个表创建视图
+    createDatabaseView()
+
+    #开始正式查询相关类别的数据
+    sql = "select * from view_affair_type_"+affairType
+    cursor.execute(sql)
+    affairData = cursor.fetchall()
+    print(affairData)
+
+    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png'}
+    return render(request, 'affair/affairDisplay.html', context)
+
+
+
+def createDatabaseView():
+    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
+    cursor = db.cursor()
+    for type in typeDic.keys():
+        #为每一个类别建立视图
+        sql = "drop view view_affair_type_"+type
+        cursor.execute(sql)
+        print(type)
+        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.NeedReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from (select * from affair_affairinfo where affair_affairinfo.type = '"+ type +"' ) as info left join affair_affairimg as img on info.affairid = img.affair_id)"
+        cursor.execute(sql)
+        db.commit()
+    db.close()
+
+
+class MyError(Exception):  # 定义一个异常类，继承Exception
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message

@@ -1,0 +1,75 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+    <!--额外引入-->
+    <script type="text/javascript" src="{% static "js/mp.mansory.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#my-gallery-container").mpmansory(
+            {
+              childrenClass: '', // default is a div
+              columnClasses: '', //add classes to items
+              breakpoints:{
+                lg: 6,
+                md: 6,
+                sm: 6,
+                xs: 12
+              },
+              distributeBy: { order: false, height: false, attr: 'data-order', attrOrder: 'asc' },
+              onload: function (items) {
+                //make somthing with items
+              }
+            }
+          );
+
+        })
+
+    </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+<!--主题部分-->
+<div class="container">
+
+    <div class="row" id="my-gallery-container"><!-- 将要加入的略缩图放入row中 -->
+        {% for affair in affairData %}
+        <div>
+            <div class="thumbnail">
+                <div class="row">
+                    <!--start这是图片放置的位置-->
+                    {% if affair.img %}
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive"/>
+                    </div>
+                    {% else %}
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive"/>
+                    </div>
+                    {% endif %}
+
+                    <!--end这是图片放置的位置-->
+                    <!--start这是文字描述放置的位置-->
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        <div class="caption">
+                            <h4>Jackma3</h4>
+                            <p style="color:red;">1只皮卡丘</p>
+                        </div>
+                    </div>
+                    <!--end这是文字描述放置的位置-->
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+</div>
+
+</body>
+</html>
