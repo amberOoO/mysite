@@ -13,10 +13,10 @@
               childrenClass: '', // default is a div
               columnClasses: '', //add classes to items
               breakpoints:{
-                lg: 6,
-                md: 6,
+                lg: 3,
+                md: 4,
                 sm: 6,
-                xs: 12
+                xs: 6
               },
               distributeBy: { order: false, height: false, attr: 'data-order', attrOrder: 'asc' },
               onload: function (items) {
@@ -41,33 +41,23 @@
         {% for affair in affairData %}
         <div>
             <div class="thumbnail">
-                <div class="row">
-                    <!--start这是图片放置的位置-->
-                    {% if affair.img %}
-                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
-                        <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive"/>
+                <!--start这是图片放置的位置-->
+                {% if affair.img %}
+                    <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                {% else %}
+                    <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                {% endif %}
+                <!--end这是图片放置的位置-->
+                <!--start这是文字描述放置的位置-->
+                    <div class="caption">
+                        <h4>Jackma3</h4>
+                        <p style="color:red;">1只皮卡丘</p>
                     </div>
-                    {% else %}
-                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
-                        <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive"/>
-                    </div>
-                    {% endif %}
-
-                    <!--end这是图片放置的位置-->
-                    <!--start这是文字描述放置的位置-->
-                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
-                        <div class="caption">
-                            <h4>Jackma3</h4>
-                            <p style="color:red;">1只皮卡丘</p>
-                        </div>
-                    </div>
-                    <!--end这是文字描述放置的位置-->
-                </div>
+                <!--end这是文字描述放置的位置-->
             </div>
         </div>
         {% endfor %}
     </div>
-
 
 </div>
 
