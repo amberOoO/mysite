@@ -54,11 +54,17 @@
                         beforeSend: function (xhr, setting) {
                                 xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
                             },
+                        ok:function(){
+                            this.title('提交中…');
+                            //显示
+                            $('#loadingModal').modal({backdrop: 'static', keyboard: false});
+                            $("#loadingModal").modal('show');
+                        },
                         success: function (data) {
                             if (data['statusCode'] == '0') {
                                 var delay=5;
                                 $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
-                                $('#loginModal').modal('hide');
+                                $('#warning').modal({backdrop: 'static', keyboard: false});
                                 $('#warning').modal('show');
                                 clock1 = setInterval(function () {
                                     delay = delay - 1;
@@ -90,6 +96,10 @@
                     var control = $('#' + ctrlName);
                     //初始化上传控件的样式
                     control.fileinput({
+                        resizeImage : true,
+                        maxImageWidth : 200,
+                        maxImageHeight : 200,
+                        resizePreference : 'width',
                         language: 'zh', //设置语言
                         uploadUrl: uploadUrl, //上传的地址
                         allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
@@ -212,6 +222,14 @@
         </form>
     </div>
 
+    <div class="modal fade" id="loadingModal">
+    <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+        <div class="progress progress-striped active" style="margin-bottom: 0;">
+            <div class="progress-bar" style="width: 100%;"></div>
+        </div>
+        <h5>正在加载...</h5>
+    </div>
+</div>
 
 </body>
 </html>

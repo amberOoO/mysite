@@ -1,11 +1,76 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
     {% include "parts/head.html" %}
+    <link href="{% static "css/docs.min.css" %}" rel="stylesheet">
+    <title>首页</title>
 </head>
 <body>
 {% include "parts/nav.html" %}
 
+<main class="bs-docs-masthead" id="content" tabindex="-1">
+  <div class="container">
+    <span class="bs-docs-booticon bs-docs-booticon-lg bs-docs-booticon-outline">H</span>
+    <p class="lead">校园互助平台是由著名大师JackMa室友开发的校园一站解决网站。</p>
+    <p class="lead">
+      <a href="getting-started#download" class="btn btn-outline-inverse btn-lg" href="" data-toggle="modal" data-dismiss="modal" data-target="#registerModal">马上注册</a>
+    </p>
+    <p class="version">当前版本： v0.0.1 | 更新于：2019-06-19</p>
+    <div id="tuijian"></div>
+  </div>
+</main>
+
+<div class="bs-docs-featurette">
+  <div class="container">
+    <h2 class="bs-docs-featurette-title">有不方便的事？</h2>
+    <p class="lead">互助平台为您提供校园内一站式解决方案，让您足不出户，解决校园内发生的一切事情！</p>
+
+    <hr class="half-rule">
+
+    <div class="row">
+      <div class="col-sm-4">
+        <img src="/media/index/default.png" alt="Sass and Less support" class="img-responsive">
+        <h3>不想出门？却突然来了快递？</h3>
+        <p>在我们的平台上发布一条帮忙跑腿消息，同平台的所有会员能在第一时间收到相关信息，并伸出求助之手。</p>
+      </div>
+      <div class="col-sm-4">
+        <img src="/media/index/default.png" alt="Responsive across devices" class="img-responsive">
+        <h3>有闲置物品？</h3>
+        <p>快来淘淘页面，发布自己的二手物品，第一时间让学校内同学获知。若有想买的东西，却有些”囊中羞涩“，也能来淘到满意的宝贝哦！</p>
+      </div>
+      <div class="col-sm-4">
+        <img src="/media/index/default.png" alt="Components" class="img-responsive">
+        <h3>丢东西了，心急如焚却不知所措？捡到东西，却不知道如何处理？</h3>
+        <p>快来平台发布实物信息，平台将会在后台智能匹配，发现最有可能的匹配对象，返回给你哦！</p>
+      </div>
+{#        <div class="col-sm-4">#}
+{#        <img src="/media/index/default.png" alt="Components" class="img-responsive">#}
+{#        <h3>深度接入校园接口</h3>#}
+{#        <p>在学校外，没有校园网，却突然得知某某课程出成绩了？心中焦急不已，步入登录本平台，深入接入校园网，教学信息第一时间得知！</p>#}
+{#      </div>#}
+    </div>
+
+    <hr class="half-rule">
+
+    <p class="lead">若有需要，不要等待，马上注册吧！</p>
+    <a href="" data-toggle="modal" data-dismiss="modal" data-target="#registerModal" class="btn btn-outline btn-lg">来来来，块点我注册</a>
+  </div>
+</div>
+
+<div class="bs-docs-featurette">
+  <div class="container">
+    <h2 class="bs-docs-featurette-title">基于 Bootstrap 构建的网站</h2>
+    <p class="lead">全球数以百万计的网站都是基于 Bootstrap 构建的。你可以先参观一下我们提供的<a href="../getting-started/#examples">实例精选</a>或者看一看我们粉丝的网站吧。</p>
+
+    <hr class="half-rule">
+
+    <hr class="half-rule">
+
+    <p class="lead">我们在“优站精选”里展示了许多精美的 Bootstrap 网站。</p>
+    <a href="http://www.youzhan.org" class="btn btn-outline btn-lg">逛一逛“优站精选”</a>
+  </div>
+</div>
 
 </body>
 </html>
