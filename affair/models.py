@@ -24,8 +24,8 @@ class AffairInfo(models.Model):
 
 class AffairImg(models.Model):
     affair = models.ForeignKey('affair.AffairInfo', on_delete=models.CASCADE)
-    img = models.ImageField(upload_to='affairImg')
-    name = models.CharField(max_length=50)
+    img = models.ImageField(upload_to='affairImg', max_length=80)
+    name = models.CharField(max_length=80)
 
     def __str__(self):
         return self.name
