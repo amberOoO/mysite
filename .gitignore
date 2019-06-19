@@ -12,3 +12,4 @@ media/*/*
 
 # pycache
 __pycache__
+env
