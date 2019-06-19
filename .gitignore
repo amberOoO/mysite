@@ -1,0 +1,14 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*/migrations/0*
+
+# media
+media/*/*
+!media/*/default.png
+
+# pycache
+__pycache__
