@@ -126,9 +126,16 @@ def createDatabaseView():
         sql = "drop view if exists view_affair_type_"+type
         cursor.execute(sql)
         print(type)
-        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.NeedReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from (select * from affair_affairinfo where affair_affairinfo.type = '"+ type +"' ) as info left join affair_affairimg as img on info.affairid = img.affair_id)"
+
+        sql = "drop view if exists view_affair_type_briefInfo_"+type
         cursor.execute(sql)
-        db.commit()
+
+        sql = "create view view_affair_type_briefInfo_"+type+" as (select * from affair_affairinfo where affair_affairinfo.type = '"+ type +"' )"
+        cursor.execute(sql)
+
+        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.NeedReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_"+type+" as info left join affair_affairimg as img on info.affairid = img.affair_id)"
+        cursor.execute(sql)
+
     db.close()
 
 
