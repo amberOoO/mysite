@@ -151,8 +151,8 @@
                     <div class="form-group">
                         <label for="type">类别</label>
                         <select class="form-control" id="type" name="type">
-                            {% for typeValue,typeName in typeDic.items %}
-                            <option value="{{ typeValue }}">{{ typeName }}</option>
+                            {% for typeName in typeArray %}
+                            <option value="{{ typeName }}">{{ typeName }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -180,8 +180,8 @@
                         <br/>
                         <select data-placeholder="请选择标签" class="chosen-select form-control" multiple=""
                                 style="width:350px;height:34px;" tabindex="4" id="tagSelect" name="tag">
-                            {% for tagValue,tagName in tag.items %}
-                            <option value="{{ tagValue }}" hassubinfo="true">{{ tagName }}</option>
+                            {% for tagName in tagArray %}
+                            <option value="{{ tagName }}" hassubinfo="true">{{ tagName }}</option>
                             {% endfor %}
                         </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </div>

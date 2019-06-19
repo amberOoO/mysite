@@ -10,6 +10,15 @@
       var flag = new Array(4);
       //ready函数
       $(function() {
+
+
+          $("nav li").mouseover(function () {
+              $(this).addClass("active");
+          })
+          $("nav li").mouseout(function () {
+              $(this).removeClass("active");
+          })
+
         //开启新界面，判断是否已经登录。即判断loginStatus
         if($.cookie('loginStatus')=='1')
         {
@@ -295,7 +304,6 @@
         $.cookie('password',null,{path:'/'});
         $.cookie('loginStatus','0',{expires:1,path:'/'});
       };
-
 
 
 

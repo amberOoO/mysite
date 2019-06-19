@@ -42,12 +42,13 @@
         <div class="row" id="my-gallery-container"><!-- 将要加入的略缩图放入row中 -->
         {% for affair in affairData %}
             <div>
+            <a href="{% url "affair:affairDisplay" affairType %}/{{ affair.affairId }}">
                 <div class="thumbnail">
                     <!--start这是图片放置的位置-->
                     {% if affair.img %}
-                        <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                        <img src="/media/{{ affair.img }}" alt="皮卡丘" class="img-responsive"/>
                     {% else %}
-                        <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive" width="400"/>
+                        <img src="/media/{{ defaultImgPath }}" alt="皮卡丘" class="img-responsive"/>
                     {% endif %}
                     <!--end这是图片放置的位置-->
                     <!--start这是文字描述放置的位置-->
@@ -63,6 +64,7 @@
                         </div>
                     <!--end这是文字描述放置的位置-->
                 </div>
+            </a>
             </div>
         {% endfor %}
         </div>

@@ -15,6 +15,9 @@ typeDic = {'study': '学习帮助',
            'groupNeed': '组队需求',
            'other': '其他'}
 
+typeArray = ['学习帮助', '日常帮助', '闲置物品', '技术帮助', '组队需求', '其他']
+
+
 tagDic = {'errand': '跑腿',
           'takeOut': '外卖',
           'express': '快递',
@@ -24,6 +27,7 @@ tagDic = {'errand': '跑腿',
           'findTheOtherPart': '找伴',
           'findFriend': '找伴'}
 
+tagArray = ['跑腿', '外卖', '快递', '辅导', '组队', '竞赛', '找伴']
 def createAffair(request):
 
     num = []
@@ -32,7 +36,7 @@ def createAffair(request):
         num.append(temp)
         temp=temp*2
 
-    context = {'typeDic':typeDic, 'num':num, 'tag':tagDic, "typeDic":typeDic}
+    context = {'typeDic':typeDic, 'typeArray':typeArray, 'num':num, 'tagArray':tagArray}
     return render(request, 'affair/createAffair.html', context)
 
 
@@ -113,9 +117,8 @@ def affairDisplay(request, affairType):
     affairData = cursor.fetchall()
     print(affairData)
 
-    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png', "typeDic":typeDic}
+    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png', "typeDic":typeDic, 'affairType':affairType}
     return render(request, 'affair/affairDisplay.html', context)
-
 
 
 def createDatabaseView():
@@ -130,13 +133,32 @@ def createDatabaseView():
         sql = "drop view if exists view_affair_type_briefInfo_"+type
         cursor.execute(sql)
 
-        sql = "create view view_affair_type_briefInfo_"+type+" as (select * from affair_affairinfo where affair_affairinfo.type = '"+ type +"' )"
+        sql = "create view view_affair_type_briefInfo_"+type+" as (select * from affair_affairinfo where affair_affairinfo.type = '"+ typeDic[type] +"' )"
         cursor.execute(sql)
 
-        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.NeedReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_"+type+" as info left join affair_affairimg as img on info.affairid = img.affair_id)"
+        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_"+type+" as info left join affair_affairimg as img on info.affairid = img.affair_id)"
         cursor.execute(sql)
 
     db.close()
+
+
+def affairDetail(request, affairType, affairId):
+    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    sql = 'select * from view_affair_type_'+str(affairType)+' as info where info.affairId = '+str(affairId)
+    cursor.execute(sql)
+    affairData = cursor.fetchall()
+
+    print(affairData)
+
+    imgArray = []
+    for img in affairData:
+        temp = {'img':img['img'], 'name':img['name']}
+        imgArray.append(temp)
+
+    print(affairData[0]['needReceiverNum'])
+    context = {'affairData':affairData[0], 'imgArray':imgArray, "typeDic":typeDic}
+    return render(request, 'affair/affairDetail.html', context)
 
 
 class MyError(Exception):  # 定义一个异常类，继承Exception

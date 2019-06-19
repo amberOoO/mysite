@@ -6,4 +6,5 @@ urlpatterns = [
     path('createAffair', views.createAffair, name="createAffair"),
     path('processSubmit', views.processSubmit, name="processSubmit"),
     path('<str:affairType>', views.affairDisplay, name="affairDisplay"),
+    path('<str:affairType>/<int:affairId>', views.affairDetail, name="affairDetail"),
 ]
