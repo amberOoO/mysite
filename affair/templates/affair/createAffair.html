@@ -4,12 +4,14 @@
 <head>
     {# 引入公共头部#}
     {% include "parts/head.html" %}
+    <title>创建事务</title>
         <!--额外引入-->
         <!--用来传图片-->
         <link href="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.css" rel="stylesheet"/>
         <script src="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.jquery.js"></script>
         <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/fileinput.js"></script>
         <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/locales/zh.js"></script>
+        <script src="{% static "js/piexif.js" %}"></script>
         <link href="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/css/fileinput.css" rel="stylesheet"/>
         <script type="text/javascript">
             //初始化fileinput
@@ -44,7 +46,6 @@
                 $("#affairSubmit").click(function () {
                     //var fs = document.getElementById('forms');
                     var fd = new FormData($('#forms')[0]);
-                    alert(fd);
                     $.ajax({
                         url: "{% url 'affair:processSubmit' %}",
                         type: "POST",
@@ -52,17 +53,18 @@
                         processData: false,  // 告诉jQuery不要去处理发送的数据
                         contentType: false,   // 告诉jQuery不要去设置Content-Type请求头
                         beforeSend: function (xhr, setting) {
-                                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+                                console.log('23333');
+                                //显示
+                                $('#loadingModal').modal({backdrop: 'static', keyboard: false});
+                                $("#loadingModal").modal('show');
                             },
-                        ok:function(){
-                            this.title('提交中…');
-                            //显示
-                            $('#loadingModal').modal({backdrop: 'static', keyboard: false});
-                            $("#loadingModal").modal('show');
-                        },
                         success: function (data) {
                             if (data['statusCode'] == '0') {
                                 var delay=5;
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
                                 $('#warningContent').html("<h1>事务创建成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
                                 $('#warning').modal({backdrop: 'static', keyboard: false});
                                 $('#warning').modal('show');
@@ -75,20 +77,28 @@
                                 },delay*1000);
                             }
                             if (data['statusCode'] == '1'||data['statusCode'] == '2') {
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
                                 warning('您的登录有问题，请重新登录');
                                 afterUnlogin();
                             }
                             if (data['statusCode'] == '3') {
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
                                 warning('因未知原因，创建失败！');
                             }
                         },
                         error: function() {
+                            $("#loadingModal").modal('hide');
+                            $("#warning").modal({backdrop: 'static', keyboard: false});
                             //请求出错处理
                             warning('请求出错');
                         }
                     });
                 });
-            })
+
+
+            });
             var FileInput = function () {
                 var oFile = new Object();
                 //初始化fileinput控件（第一次初始化）
@@ -222,12 +232,12 @@
         </form>
     </div>
 
-    <div class="modal fade" id="loadingModal">
+<div class="modal fade" id="loadingModal">
     <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
         <div class="progress progress-striped active" style="margin-bottom: 0;">
             <div class="progress-bar" style="width: 100%;"></div>
         </div>
-        <h5>正在加载...</h5>
+        <h5>正在上传...</h5>
     </div>
 </div>
 
