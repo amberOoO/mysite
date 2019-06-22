@@ -2,13 +2,73 @@
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
+    <title>商品详情</title>
+
     {# 引入公共头部#}
     {% include "parts/head.html" %}
-        <!--额外引入-->
-    <script type="text/javascript">
 
+    <!--额外引入-->
+    <script type="text/javascript">
+        $(function () {
+            $('#getAffair').click(function () {
+                var data={
+                    'receiverId':$.cookie('id'),
+                    'providerId':{{ affairData.affairProviderId_id }},
+                    'affairId':{{ affairData.affairId }},
+                };
+
+
+                $.ajax({
+                    url: "{% url "order:createOrder" %}",
+                    //请求的url地址
+                    type:"post",
+                    //请求方式
+                    dataType: "json",
+                    //返回格式为json
+                    async: true,
+                    //请求是否异步，默认为异步，这也是ajax重要特性
+                    data: JSON.stringify(data),
+                    //参数值
+                    beforeSend: function (xhr, setting) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                    },
+                    success: function(data) {
+                      if(data['statusCode']=='0')
+                      {
+                          warning('接受成功');
+                          $("#receiverNum").html(data['receiverNum']);
+                      }
+                      else if(data['statusCode']=='1')
+                      {
+                          warning('上传数据错误');
+                      }else if(data['statusCode']=='2')
+                      {
+                          warning('创建失败');
+                      }else if(data['statusCode']=='3')
+                      {
+                          warning('事务不存在');
+                      }else if(data['statusCode']=='4')
+                      {
+                          warning('人手已经足够了哦');
+                          $("#receiverNum").html(data['receiverNum']);
+                      }
+
+
+
+                    },
+                    complete: function() {
+                      //请求完成的处理
+                    },
+                    error: function() {
+                      //请求出错处理
+                      warning('请求出错');
+                    }
+                  });
+
+
+            });
+        });
     </script>
-    <title>商品详情</title>
 
 </head>
 <body>
@@ -108,8 +168,7 @@
                     </h4>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                    <h4>
-                        <strong>人数:</strong> {{ affairData.receiverNum }}/{{ affairData.needReceiverNum }}
+                        <strong>人数:</strong> <span id="receiverNum">{{ affairData.receiverNum }}</span>/{{ affairData.needReceiverNum }}
                     </h4>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -127,7 +186,7 @@
 
 
 
-            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg">能帮上忙？那就快快帮帮他吧！</button>
+            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg" id="getAffair">能帮上忙？那就快快帮帮他吧！</button>
         </div>
     </div>
 

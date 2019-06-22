@@ -54,8 +54,6 @@
                         contentType: false,   // 告诉jQuery不要去设置Content-Type请求头
                         beforeSend: function (xhr, setting) {
                                 xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-
-                                console.log('23333');
                                 //显示
                                 $('#loadingModal').modal({backdrop: 'static', keyboard: false});
                                 $("#loadingModal").modal('show');

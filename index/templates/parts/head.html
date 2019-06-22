@@ -208,7 +208,7 @@
       }
 
        function login(){
-		          var $loginPhoneNumber = $('#loginPhoneNumber');
+          var $loginPhoneNumber = $('#loginPhoneNumber');
           var $pwd = $('#loginPassword');
 
           if ($loginPhoneNumber.val() == "") {
@@ -269,6 +269,10 @@
                 expires: 1,
                 path: '/'
               });
+              $.cookie('id', data['id'], {
+                expires: 1,
+                path: '/'
+              });
 
               afterLogin();
               warning(data['nickName']+'登陆成功！！');
@@ -280,7 +284,7 @@
               //请求出错处理
               warning('请求出错');
             }
-          })
+          });
 	};
 
 
@@ -304,6 +308,7 @@
       function cookieClear() {
         $.cookie('nickName',null,{path:'/'});
         $.cookie('password',null,{path:'/'});
+        $.cookie('id',null,{path:'/'});
         $.cookie('loginStatus','0',{expires:1,path:'/'});
       };
 

@@ -9,34 +9,34 @@ from login.views import cookiesVerify
 import pymysql
 
 typeDic = {'study': '学习帮助',
-           'life': '日常帮助',
-           'restThing': '闲置物品',
-           'techNeed': '技术帮助',
-           'groupNeed': '组队需求',
-           'other': '其他'}
+                  'life': '日常帮助',
+                  'restThing': '闲置物品',
+                  'techNeed': '技术帮助',
+                  'groupNeed': '组队需求',
+                  'other': '其他'}
 
 typeArray = ['学习帮助', '日常帮助', '闲置物品', '技术帮助', '组队需求', '其他']
 
-
 tagDic = {'errand': '跑腿',
-          'takeOut': '外卖',
-          'express': '快递',
-          'tutor': '辅导',
-          'findGroup': '组队',
-          'competition': '竞赛',
-          'findTheOtherPart': '找伴',
-          'findFriend': '找伴'}
+                 'takeOut': '外卖',
+                 'express': '快递',
+                 'tutor': '辅导',
+                 'findGroup': '组队',
+                 'competition': '竞赛',
+                 'findTheOtherPart': '找伴',
+                 'findFriend': '找伴'}
 
 tagArray = ['跑腿', '外卖', '快递', '辅导', '组队', '竞赛', '找伴']
-def createAffair(request):
 
+
+def createAffair(request):
     num = []
     temp = 1
     for i in range(10):
         num.append(temp)
-        temp=temp*2
+        temp = temp * 2
 
-    context = {'typeDic':typeDic, 'typeArray':typeArray, 'num':num, 'tagArray':tagArray}
+    context = {'typeDic': typeDic, 'typeArray': typeArray, 'num': num, 'tagArray': tagArray}
     return render(request, 'affair/createAffair.html', context)
 
 
@@ -55,26 +55,25 @@ def processSubmit(request):
                                     affairName=data['affairName'],
                                     affairDetail=data['affairDetail'],
                                     affairCreateTime=timezone.now(),
-                                    NeedReceiverNum=int(data['receiverNum'][0])
+                                    needReceiverNum=int(data['receiverNum'][0])
                                     )
 
-            if(data['reward']==''):
+            if (data['reward'] == ''):
                 affairInfo.rewardType = '0'
                 affairInfo.rewardMoney = 0
             else:
-                judge = '0'   #0代表全是数字，则判断酬劳为RMB
+                judge = '0'  # 0代表全是数字，则判断酬劳为RMB
                 for c in data['reward']:
-                    if((c<='0' or c>='9') and c!='.'):
+                    if ((c <= '0' or c >= '9') and c != '.'):
                         judge = '1'
                         break
                 affairInfo.rewardType = '0'
-                if(judge == '0'):
+                if (judge == '0'):
                     affairInfo.rewardMoney = float(data['reward'])
                     print(float(data['reward']))
                 else:
                     affairInfo.rewardType = '1'
                     affairInfo.rewardThing = data['reward']
-
 
             print(data.getlist('tag'))
             temp = ''
@@ -106,46 +105,47 @@ def processSubmit(request):
 
 
 def affairDisplay(request, affairType):
-    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    #为各个表创建视图
-    createDatabaseView()
+    # 为各个表创建视图
+    createDatabaseView(db, cursor)
 
-    #开始正式查询相关类别的数据
-    sql = "select * from view_affair_type_"+affairType
+    # 开始正式查询相关类别的数据
+    sql = "select * from view_affair_type_" + affairType
     cursor.execute(sql)
     affairData = cursor.fetchall()
     print(affairData)
 
-    context = {'affairData':affairData, 'defaultImgPath':'affairImg/default.png', "typeDic":typeDic, 'affairType':affairType}
+    context = {'affairData': affairData, 'defaultImgPath': 'affairImg/default.png', "typeDic": typeDic,
+               'affairType': affairType}
     return render(request, 'affair/affairDisplay.html', context)
 
 
-def createDatabaseView():
-    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
-    cursor = db.cursor()
+def createDatabaseView(db, cursor):
     for type in typeDic.keys():
-        #为每一个类别建立视图
-        sql = "drop view if exists view_affair_type_"+type
-        cursor.execute(sql)
-        print(type)
+        try:
+            # 为每一个类别建立视图
+            sql = "drop view if exists view_affair_type_" + type
+            cursor.execute(sql)
+            print(type)
 
-        sql = "drop view if exists view_affair_type_briefInfo_"+type
-        cursor.execute(sql)
+            sql = "drop view if exists view_affair_type_briefInfo_" + type
+            cursor.execute(sql)
 
-        sql = "create view view_affair_type_briefInfo_"+type+" as (select * from affair_affairinfo where affair_affairinfo.type = '"+ typeDic[type] +"' )"
-        cursor.execute(sql)
+            sql = "create view view_affair_type_briefInfo_{0}  as (select * from affair_affairinfo where affair_affairinfo.type = '{1}' )".format(str(type),str(typeDic[type]))
+            cursor.execute(sql)
 
-        sql = "create view view_affair_type_"+ type +" as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_"+type+" as info left join affair_affairimg as img on info.affairid = img.affair_id)"
-        cursor.execute(sql)
-
-    db.close()
+            sql = "create view view_affair_type_{0} as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_{1} as info left join affair_affairimg as img on info.affairid = img.affair_id)".format(str(type), str(type))
+            cursor.execute(sql)
+            db.commit()
+        except Exception as e:
+            print("创建视图错误：\n"+str(e))
 
 
 def affairDetail(request, affairType, affairId):
-    db = pymysql.connect('127.0.0.1','root','522087905','mysite')
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    sql = 'select * from view_affair_type_'+str(affairType)+' as info where info.affairId = '+str(affairId)
+    sql = 'select * from view_affair_type_' + str(affairType) + ' as info where info.affairId = ' + str(affairId)
     cursor.execute(sql)
     affairData = cursor.fetchall()
 
@@ -153,11 +153,11 @@ def affairDetail(request, affairType, affairId):
 
     imgArray = []
     for img in affairData:
-        temp = {'img':img['img'], 'name':img['name']}
+        temp = {'img': img['img'], 'name': img['name']}
         imgArray.append(temp)
 
     print(affairData[0]['needReceiverNum'])
-    context = {'affairData':affairData[0], 'imgArray':imgArray, "typeDic":typeDic}
+    context = {'affairData': affairData[0], 'imgArray': imgArray, "typeDic": typeDic}
     return render(request, 'affair/affairDetail.html', context)
 
 
