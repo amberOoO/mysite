@@ -26,5 +26,6 @@ urlpatterns = [
     path('index/', index_views.index, name='index', ),
     path('affair/', include('affair.urls'), name='affair'),
     path('order/', include('order.urls'), name='order'),
+    path('myinfo/', include('myinfo.urls'), name='myinfo'),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT}),
 ]

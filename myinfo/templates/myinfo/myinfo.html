@@ -5,7 +5,7 @@
     <title>我的信息</title>
     {# 引入公共头部#}
     {% include "parts/head.html" %}
-        <!--额外引入-->
+    <!--额外引入-->
     <script type="text/javascript">
 
     </script>
@@ -15,10 +15,54 @@
 <body>
 {% include "parts/nav.html" %}
 
-    <!--主题部分-->
-    <div class="container">
+<!--主题部分-->
 
+<div class="container">
+
+
+
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-primary">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                       aria-expanded="true" aria-controls="collapseOne">
+                        我的个人信息
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">查看/修改个人信息</a>
+                        <a href="#" class="list-group-item">查看修改收货地址</a>
+                    </div>
+                    <div class="panel-footer">-底部-</div>
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading" role="tab" id="headingTwo">
+                <h4 class="panel-title">
+                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                       href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        我的事务信息
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">我创建的事务</a>
+                        <a href="#" class="list-group-item">我接受的事务</a>
+                    </div>
+                    <div class="panel-footer">-底部-</div>
+
+            </div>
+        </div>
     </div>
+
+
+</div>
 
 
 </body>

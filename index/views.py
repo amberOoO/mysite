@@ -7,5 +7,5 @@ from django.shortcuts import render
 from affair.views import typeDic
 
 def index(request):
-    context={"typeDic": typeDic}
+    context = {"typeDic": typeDic}
     return render(request,'index/index.html', context);
