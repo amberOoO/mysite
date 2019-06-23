@@ -1,0 +1,188 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <title>详细个人信息</title>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+    <!--额外引入-->
+    <script type="text/javascript">
+        $(function () {
+            //页面加载完成后，马上进行判断
+            afterLoading();
+            //让输入框绑定淡出事件，使得按钮可以点击
+            $("#infoForm input").blur(function () {
+                if ($(this).attr('name') == 'nickName') {
+                    if ($(this).val() != '' && $(this).val() != "{{ nickName }}") {
+                        $('#changeSubmit').removeClass('disabled');
+                    } else {
+                        $('#changeSubmit').addClass('disabled');
+                    }
+                }
+                if ($(this).attr('name') == 'school') {
+                    if ($(this).val() != '' && $(this).val() != "{{ school }}") {
+                        $('#changeSubmit').removeClass('disabled');
+                    } else {
+                        $('#changeSubmit').addClass('disabled');
+                    }
+                }
+                if ($(this).attr('name') == 'schoolNumber') {
+                    if ($(this).val() != '' && $(this).val() != "{{ schoolNumber }}") {
+                        $('#changeSubmit').removeClass('disabled');
+                    } else {
+                        $('#changeSubmit').addClass('disabled');
+                    }
+                }
+
+
+            })
+            //点击提交事件
+
+            $("#changeSubmit").click(function () {
+                if(!$(this).hasClass('disabled'))
+                {
+                    var fd = new FormData($('#infoForm')[0]);
+                    $.ajax({
+                    url: "{% url 'myinfo:changeBasicInfo' %}",
+                    type: "POST",
+                    data: fd,
+                    processData: false,  // 告诉jQuery不要去处理发送的数据
+                    contentType: false,   // 告诉jQuery不要去设置Content-Type请求头
+                    beforeSend: function (xhr, setting) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        var delay = 5;
+                        if (data['statusCode'] == '0') {
+                            $.cookie('nickName', data['nickName'], {
+                                expires: 1,
+                                path: '/'
+                            });
+                            $("#userInfoNickName").html("欢迎你："+$.cookie("nickName"));
+                            $("#loadingModal").modal('hide');
+                            $("#warning").modal({backdrop: 'static', keyboard: false});
+                            $('#warningContent').html("<h1>信息修改成功</h1><h3>将在" + delay + "s后返回上一页</h3>" + "<p4><a href='{% url "myinfo:totalInfo" %}'>立即返回</a></p4>");
+                            $('#warning').modal({backdrop: 'static', keyboard: false});
+                            $('#warning').modal('show');
+                            clock1 = setInterval(function () {
+                                delay = delay - 1;
+                                $('#warningContent').html("<h1>信息修改成功</h1><h3>将在" + delay + "s后返回上一页</h3>" + "<p4><a href='{% url "myinfo:totalInfo" %}'>立即返回</a></p4>");
+                            }, 1000);
+                            clock2 = setTimeout(function () {
+                                window.history.back();
+                            }, delay * 1000);
+                        } else if (data['statusCode'] == '1') {
+                            $("#warning").modal({backdrop: 'static', keyboard: false});
+
+                            afterUnlogin();
+                            clock1 = setInterval(function () {
+                                delay = delay - 1;
+                                $('#warningContent').html("<h1>您的登录有问题，请重新登录！</h1><h3>将在" + delay + "s后返回首页</h3>" + "<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                            }, 1000);
+                            clock2 = setTimeout(function () {
+                                window.location.replace("http://{{ request.META.HTTP_HOST }}");
+                            }, delay * 1000);
+                        } else {
+                            warning("修改失败！");
+                        }
+                    },
+                    error: function () {
+                        $("#loadingModal").modal('hide');
+                        $("#warning").modal({backdrop: 'static', keyboard: false});
+                        //请求出错处理
+                        warning('请求出错');
+                    }
+                });
+                }
+
+            });
+
+
+
+        })
+
+        function afterLoading() {
+            var statusCode = {{ statusCode }};
+            var delay = 5;
+            if (statusCode == '1') {
+                $("#warning").modal({backdrop: 'static', keyboard: false});
+
+                afterUnlogin();
+                clock1 = setInterval(function () {
+                    delay = delay - 1;
+                    $('#warningContent').html("<h1>您的登录有问题，请重新登录！</h1><h3>将在" + delay + "s后返回首页</h3>" + "<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                }, 1000);
+                clock2 = setTimeout(function () {
+                    window.location.replace("http://{{ request.META.HTTP_HOST }}");
+                }, delay * 1000);
+
+            }
+            if (statusCode == '2') {
+                $("#warning").modal({backdrop: 'static', keyboard: false});
+
+                afterUnlogin();
+                clock1 = setInterval(function () {
+                    delay = delay - 1;
+                    $('#warningContent').html("<h1>数据查询失败！</h1><h3>将在" + delay + "s后上页</h3>" + "<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                }, 1000);
+                clock2 = setTimeout(function () {
+                    window.history.back();
+                }, delay * 1000);
+            }
+        }
+
+
+    </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+<!--主题部分-->
+<div class="container">
+    
+    <div class="panel panel-primary">
+        <div class="panel-heading">我的基本信息</div>
+        <div class="panel-body">
+            <form class="form-group" action="" id="infoForm">
+                <div class="form-group">
+                    <label for="nickName">昵称</label>
+                    <input class="form-control" type="text" placeholder="6-15位字母或数字" name="nickName"
+                           id="nickName" value="{{ nickName }}"/>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">手机号码</label>
+                    <input class="form-control" type="text" placeholder="例如:18866666666" name="phoneNumber"
+                           id="phoneNumber" value="{{ phoneNumber }}" disabled/>
+                </div>
+                <div class="form-group">
+                    <label for="mailAddress">邮箱</label>
+                    <input class="form-control" type="email" placeholder="例如:123@123.com" name="mailAddress"
+                           id="mailAddress" value="{{ mailAddress }}" disabled/>
+                </div>
+                <div class="form-group">
+                    <label for="school">学校</label>
+                    <input class="form-control" type="text" placeholder="例如:哈尔滨工程大学" name="school"
+                           id="school" value="{{ school }}"/>
+                </div>
+                <div class="form-group">
+                    <label for="schoolNumber">学号</label>
+                    <input class="form-control" type="text" placeholder="例如:2017061908" name="schoolNumber"
+                           id="schoolNumber" value="{{ schoolNumber }}"/>
+                </div>
+
+                <div class="text-right" id="registerButtonGroup">
+                    <button class="btn btn-primary btn-lg btn-block disabled" type="button" id="changeSubmit">确认修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

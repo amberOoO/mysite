@@ -34,8 +34,10 @@
             <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
 
                     <div class="list-group">
-                        <a href="#" class="list-group-item">查看/修改个人信息</a>
-                        <a href="#" class="list-group-item">查看修改收货地址</a>
+                        <a href="{% url "myinfo:personalInfo" %}" class="list-group-item">查看/修改个人信息</a>
+                        <a href="{% url "myinfo:changePassword" %}" class="list-group-item">修改密码</a>
+                        <a href="{% url "myinfo:changePhoneNumber" %}" class="list-group-item">修改电话</a>
+                        <a href="#" class="list-group-item">查看修改收货地址(暂未完成)</a>
                     </div>
                     <div class="panel-footer">-底部-</div>
             </div>

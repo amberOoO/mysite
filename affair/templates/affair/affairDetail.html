@@ -11,8 +11,8 @@
     <script type="text/javascript">
         $(function () {
             $('#getAffair').click(function () {
-                var data={
-                    'receiverId':$.cookie('id'),
+                var data = {
+                    'receiverId': $.cookie('id'),
                     'providerId':{{ affairData.affairProviderId_id }},
                     'affairId':{{ affairData.affairId }},
                 };
@@ -21,7 +21,7 @@
                 $.ajax({
                     url: "{% url "order:createOrder" %}",
                     //请求的url地址
-                    type:"post",
+                    type: "post",
                     //请求方式
                     dataType: "json",
                     //返回格式为json
@@ -32,38 +32,31 @@
                     beforeSend: function (xhr, setting) {
                         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
                     },
-                    success: function(data) {
-                      if(data['statusCode']=='0')
-                      {
-                          warning('接受成功');
-                          $("#receiverNum").html(data['receiverNum']);
-                      }
-                      else if(data['statusCode']=='1')
-                      {
-                          warning('上传数据错误');
-                      }else if(data['statusCode']=='2')
-                      {
-                          warning('创建失败');
-                      }else if(data['statusCode']=='3')
-                      {
-                          warning('事务不存在');
-                      }else if(data['statusCode']=='4')
-                      {
-                          warning('人手已经足够了哦');
-                          $("#receiverNum").html(data['receiverNum']);
-                      }
-
+                    success: function (data) {
+                        if (data['statusCode'] == '0') {
+                            warning('接受成功');
+                            $("#receiverNum").html(data['receiverNum']);
+                        } else if (data['statusCode'] == '1') {
+                            warning('上传数据错误');
+                        } else if (data['statusCode'] == '2') {
+                            warning('创建失败');
+                        } else if (data['statusCode'] == '3') {
+                            warning('事务不存在');
+                        } else if (data['statusCode'] == '4') {
+                            warning('人手已经足够了哦');
+                            $("#receiverNum").html(data['receiverNum']);
+                        }
 
 
                     },
-                    complete: function() {
-                      //请求完成的处理
+                    complete: function () {
+                        //请求完成的处理
                     },
-                    error: function() {
-                      //请求出错处理
-                      warning('请求出错');
+                    error: function () {
+                        //请求出错处理
+                        warning('请求出错');
                     }
-                  });
+                });
 
 
             });
@@ -72,36 +65,38 @@
 
 </head>
 <body>
-    {% include "parts/nav.html" %}
+{% include "parts/nav.html" %}
 
 <!--主题部分-->
 <div class="container">
     <div class="row clearfix">
         <div class="col-md-12 column">
             <h1>
-                <span class="glyphicon glyphicon-tags" aria-hidden="true" style="color:orangered;"></span> {{ affairData.affairId }}.{{ affairData.affairName }}
+                <span class="glyphicon glyphicon-tags" aria-hidden="true"
+                      style="color:orangered;"></span> {{ affairData.affairId }}.{{ affairData.affairName }}
             </h1>
 
             <div class="carousel slide" id="affairImgPaint">
                 {% for img in imgArray %}
-                <ol class="carousel-indicators">
+                    <ol class="carousel-indicators">
 
-                {% if forloop.counter0 == 0 %}
-                <li data-slide-to="{{ forloop.counter0 }}" data-target="#affairImgPaint" class="active">
-                </li>
-                {% else %}
-                <li data-slide-to="{{ forloop.counter0 }}" data-target="#affairImgPaint" class="">
-                </li>
-                {% endif %}
+                        {% if forloop.counter0 == 0 %}
+                            <li data-slide-to="{{ forloop.counter0 }}" data-target="#affairImgPaint" class="active">
+                            </li>
+                        {% else %}
+                            <li data-slide-to="{{ forloop.counter0 }}" data-target="#affairImgPaint" class="">
+                            </li>
+                        {% endif %}
 
 
-                </ol>
+                    </ol>
                 {% endfor %}
 
                 <div class="carousel-inner">
                     {% if not imgArray %}
                         <div class="item active">
-                            <img alt="" src="/media/affairImg/default.png" class="img-responsive center-block" style="height:300px"/>
+                            <img alt="" src="/media/affairImg/default.png" class="img-responsive center-block"
+                                 style="height:300px"/>
                             <div class="carousel-caption">
                                 <h4>
                                     事务展示
@@ -114,69 +109,75 @@
                     {% endif %}
                     {% for img in imgArray %}
                         {% if forloop.counter0 == 0 %}
-                        <div class="item active">
-                            <img alt="" src="/media/{{ img.img }}" class="img-responsive center-block" style="height:300px"/>
-                            <div class="carousel-caption">
-                                <h4>
-                                    事务展示
-                                </h4>
-                                <p>
-                                    {{ img.name }}
-                                </p>
+                            <div class="item active">
+                                <img alt="" src="/media/{{ img.img }}" class="img-responsive center-block"
+                                     style="height:300px"/>
+                                <div class="carousel-caption">
+                                    <h4>
+                                        事务展示
+                                    </h4>
+                                    <p>
+                                        {{ img.name }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
                         {% else %}
-                        <div class="item">
-                            <img alt="" src="/media/{{ img.img }}" class="img-responsive center-block" style="height:300px;"/>
-                            <div class="carousel-caption">
-                                <h4>
-                                    事务展示
-                                </h4>
-                                <p>
-                                    {{ img.name }}
-                                </p>
+                            <div class="item">
+                                <img alt="" src="/media/{{ img.img }}" class="img-responsive center-block"
+                                     style="height:300px;"/>
+                                <div class="carousel-caption">
+                                    <h4>
+                                        事务展示
+                                    </h4>
+                                    <p>
+                                        {{ img.name }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
                         {% endif %}
 
                     {% endfor %}
 
                 </div>
 
-                <a class="left carousel-control" href="#affairImgPaint" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a> <a class="right carousel-control" href="#affairImgPaint" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                <a class="left carousel-control" href="#affairImgPaint" data-slide="prev"><span
+                        class="glyphicon glyphicon-chevron-left"></span></a> <a class="right carousel-control"
+                                                                                href="#affairImgPaint"
+                                                                                data-slide="next"><span
+                    class="glyphicon glyphicon-chevron-right"></span></a>
             </div>
-
 
 
             <div class="row">
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <h4>
                         {% if affairData.type %}
-                        <strong>类型:</strong> {{ affairData.type }}
+                            <strong>类型:</strong> {{ affairData.type }}
                         {% else %}
-                        <strong>类型:</strong> 暂无
+                            <strong>类型:</strong> 暂无
                         {% endif %}
                     </h4>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <h4>
                         {% if affairData.type %}
-                        <strong>标签:</strong> {{ affairData.tag }}
+                            <strong>标签:</strong> {{ affairData.tag }}
                         {% else %}
-                        <strong>类型:</strong> 暂无
+                            <strong>类型:</strong> 暂无
                         {% endif %}
                     </h4>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                        <strong>人数:</strong> <span id="receiverNum">{{ affairData.receiverNum }}</span>/{{ affairData.needReceiverNum }}
+                    <strong>人数:</strong> <span
+                        id="receiverNum">{{ affairData.receiverNum }}</span>/{{ affairData.needReceiverNum }}
                     </h4>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <h4>
                         {% if affairData.rewardType == '0' %}
-                        <strong>酬劳:</strong> {{ affairData.rewardMoney }}
+                            <strong>酬劳:</strong> {{ affairData.rewardMoney }}
                         {% else %}
-                        <strong>酬劳:</strong> {{ affairData.rewardThing }}
+                            <strong>酬劳:</strong> {{ affairData.rewardThing }}
                         {% endif %}
                     </h4>
                 </div>
@@ -184,13 +185,12 @@
             </div>
 
 
-
-
-            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg" id="getAffair">能帮上忙？那就快快帮帮他吧！</button>
+            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg" id="getAffair">能帮上忙？那就快快帮帮他吧！
+            </button>
         </div>
     </div>
 
-<br/>
+    <br/>
 
 </div>
 
@@ -198,35 +198,33 @@
     <div class="row clearfix">
         <div class="col-md-12 column">
 
-			<div class="tabbable" id="tab">
-				<ul class="nav nav-tabs">
-					<li class="active">
-						 <a href="#detail" data-toggle="tab">详细介绍</a>
-					</li>
-					<li>
-						 <a href="#comment" data-toggle="tab">评论</a>
-					</li>
-				</ul>
+            <div class="tabbable" id="tab">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#detail" data-toggle="tab">详细介绍</a>
+                    </li>
+                    <li>
+                        <a href="#comment" data-toggle="tab">评论</a>
+                    </li>
+                </ul>
 
-				<div class="tab-content">
-					<div class="tab-pane active" id="detail">
-						<h3>
-							{{ affairData.affairDetail }}
-						</h3>
-					</div>
-					<div class="tab-pane" id="comment">
-						<h3>
-							占位
-						</h3>
-					</div>
-				</div>
-			</div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="detail">
+                        <h3>
+                            {{ affairData.affairDetail }}
+                        </h3>
+                    </div>
+                    <div class="tab-pane" id="comment">
+                        <h3>
+                            占位
+                        </h3>
+                    </div>
+                </div>
+            </div>
         </div>
 
-	</div>
+    </div>
 </div>
-
-
 
 
 </body>
