@@ -9,22 +9,22 @@ from login.views import cookiesVerify
 import pymysql
 
 typeDic = {'study': '学习帮助',
-                  'life': '日常帮助',
-                  'restThing': '闲置物品',
-                  'techNeed': '技术帮助',
-                  'groupNeed': '组队需求',
-                  'other': '其他'}
+           'life': '日常帮助',
+           'restThing': '闲置物品',
+           'techNeed': '技术帮助',
+           'groupNeed': '组队需求',
+           'other': '其他'}
 
 typeArray = ['学习帮助', '日常帮助', '闲置物品', '技术帮助', '组队需求', '其他']
 
 tagDic = {'errand': '跑腿',
-                 'takeOut': '外卖',
-                 'express': '快递',
-                 'tutor': '辅导',
-                 'findGroup': '组队',
-                 'competition': '竞赛',
-                 'findTheOtherPart': '找伴',
-                 'findFriend': '找伴'}
+          'takeOut': '外卖',
+          'express': '快递',
+          'tutor': '辅导',
+          'findGroup': '组队',
+          'competition': '竞赛',
+          'findTheOtherPart': '找伴',
+          'findFriend': '找伴'}
 
 tagArray = ['跑腿', '外卖', '快递', '辅导', '组队', '竞赛', '找伴']
 
@@ -55,6 +55,7 @@ def processSubmit(request):
                                     affairName=data['affairName'],
                                     affairDetail=data['affairDetail'],
                                     affairCreateTime=timezone.now(),
+                                    lastUpdateTime=timezone.now(),
                                     needReceiverNum=int(data['receiverNum'][0])
                                     )
 
@@ -77,10 +78,8 @@ def processSubmit(request):
 
             print(data.getlist('tag'))
             temp = ''
-            # reward待补充
             for tag in data.getlist('tag'):  # 里边会有多个标签
                 temp = temp + tag + ';'
-                print(temp)
             affairInfo.tag = temp
             affairInfo.save()
 
@@ -100,7 +99,6 @@ def processSubmit(request):
         sendBack = {'statusCode': '3'}
         return JsonResponse(sendBack)
 
-    print('图片来了？？？')
     return JsonResponse(sendBack)
 
 
@@ -132,14 +130,16 @@ def createDatabaseView(db, cursor):
             sql = "drop view if exists view_affair_type_briefInfo_" + type
             cursor.execute(sql)
 
-            sql = "create view view_affair_type_briefInfo_{0}  as (select * from affair_affairinfo where affair_affairinfo.type = '{1}' )".format(str(type),str(typeDic[type]))
+            sql = "create view view_affair_type_briefInfo_{0}  as (select * from affair_affairinfo where affair_affairinfo.type = '{1}' )".format(
+                str(type), str(typeDic[type]))
             cursor.execute(sql)
 
-            sql = "create view view_affair_type_{0} as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_{1} as info left join affair_affairimg as img on info.affairid = img.affair_id)".format(str(type), str(type))
+            sql = "create view view_affair_type_{0} as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_{1} as info left join affair_affairimg as img on info.affairid = img.affair_id)".format(
+                str(type), str(type))
             cursor.execute(sql)
             db.commit()
         except Exception as e:
-            print("创建视图错误：\n"+str(e))
+            print("创建视图错误：\n" + str(e))
 
 
 def affairDetail(request, affairType, affairId):
@@ -159,6 +159,117 @@ def affairDetail(request, affairType, affairId):
     print(affairData[0]['needReceiverNum'])
     context = {'affairData': affairData[0], 'imgArray': imgArray, "typeDic": typeDic}
     return render(request, 'affair/affairDetail.html', context)
+
+
+def editAffair(request, affairId):
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+
+    sql = '''
+    select *
+    from affair_affairInfo as info
+    where info.affairId = {0}'''.format(str(affairId))
+
+    cursor.execute(sql)
+    data = cursor.fetchone()
+    needReceiverNum = data['needReceiverNum']
+
+    tag = data['tag']
+    tag = tag.split(';')
+    tag.pop()
+    data['tag'] = tag
+
+    num = []
+    temp = 1
+    for i in range(10):
+        if (i < needReceiverNum):
+            continue
+        num.append(temp)
+        temp = temp * 2
+
+    context = {'typeDic': typeDic, 'typeArray': typeArray, 'num': num, 'tagArray': tagArray}
+    context['previousedData'] = data
+
+    db.close()
+    return render(request, "affair/editAffair.html", context)
+
+
+def processEditAffair(request, affairId):
+    result = cookiesVerify(request)
+    print(result)
+    if (result == '0'):
+        try:
+            db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+            cursor = db.cursor(pymysql.cursors.DictCursor)
+
+            data = request.POST
+            print(data)
+            affairName = data['affairName']
+            affairType = data['type']
+            needReceiverNum = data['receiverNum']
+            reward = data['reward']
+            affairDetail = data['affairDetail']
+
+            temp = ''
+            for tag in data.getlist('tag'):  # 里边会有多个标签
+                temp = temp + tag + ';'
+            tag = temp
+            print(tag)
+
+            if (data['reward'] == ''):
+                rewardType = '0'
+                rewardMoney = 0
+                rewardThing = 'nothing'
+            else:
+                judge = '0'  # 0代表全是数字，则判断酬劳为RMB
+                for c in data['reward']:
+                    if ((c <= '0' or c >= '9') and c != '.'):
+                        judge = '1'
+                        break
+                rewardType = '0'
+                if (judge == '0'):
+                    rewardMoney = float(data['reward'])
+                    rewardThing = 'nothing'
+                else:
+                    rewardType = '1'
+                    rewardThing = data['reward']
+                    rewardMoney = 0
+
+            sql = """
+                    update affair_affairInfo as info
+                    set info.affairName = '{0}', info.needReceiverNum = {1}, info.tag = '{2}', info.affairDetail = '{3}', info.type = '{4}', info.rewardType = '{5}', info.rewardMoney = {6}, info.rewardThing = '{7}'
+                    where info.affairId = {5}""".format(str(affairName), str(needReceiverNum),
+                                                        str(affairDetail), str(affairDetail), str(affairType),
+                                                        str(rewardType), str(rewardMoney), str(rewardThing),
+                                                        str(affairId))
+            print(sql)
+            cursor.execute(sql)
+            if (request.FILES.getlist('img_file')):
+                print("进来了？？？？")
+                affairInfo = AffairInfo.objects.get(affairId=affairId)
+                previousImg = AffairImg.objects.filter(affair_id=4)
+                for img in previousImg:
+                    img.delete()
+
+                for imgFile in request.FILES.getlist('img_file'):
+                    new_img = affairInfo.affairimg_set.create(
+                        img=imgFile,
+                        name=imgFile.name
+                    )
+            db.commit()
+            db.close()
+            sendBack = {"statusCode": "0"}
+            return JsonResponse(sendBack)
+
+        except Exception as e:
+            db.rollback()
+            db.close()
+            print("processEditAffair()数据库操作失败：\n", e)
+            sendBack = {"statusCode": "2"}
+            return JsonResponse(sendBack)
+    else:
+        sendBack = {"statusCode": "1"}
+        return JsonResponse(sendBack)
 
 
 class MyError(Exception):  # 定义一个异常类，继承Exception

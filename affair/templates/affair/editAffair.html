@@ -1,0 +1,269 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+    <title>修改事务</title>
+        <!--额外引入-->
+        <!--用来传图片-->
+        <link href="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.css" rel="stylesheet"/>
+        <script src="https://cdn.bootcss.com/chosen/1.8.8.rc6/chosen.jquery.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/fileinput.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/js/locales/zh.js"></script>
+        <script src="{% static "js/piexif.js" %}"></script>
+        <link href="https://cdn.bootcss.com/bootstrap-fileinput/5.0.3/css/fileinput.css" rel="stylesheet"/>
+        <script type="text/javascript">
+            //初始化fileinput
+            $(function () {
+                //对多选的js操作
+                var config =
+                    {
+                        '.chosen-select': {},
+                        '.chosen-select-deselect': {
+                            allow_single_deselect: true
+                        },
+                        '.chosen-select-no-single': {
+                            disable_search_threshold: 10
+                        },
+                        '.chosen-select-no-results': {
+                            no_results_text: 'Oops, nothing found!'
+                        },
+                        '.chosen-select-width': {
+                            width: "95%"
+                        }
+                    }
+                for (var selector in config) {
+                    $(selector).chosen(config[selector]);
+                }
+                //0.初始化fileinput
+                var oFileInput = new FileInput();
+                oFileInput.Init("img_file", "{% url 'affair:processEditAffair' previousedData.affairId %}");
+                $("#uploadImg").click(function () {
+                    $("#myModal").modal("show");
+                });
+                //提交修改的事务信息
+                $("#affairSubmit").click(function () {
+                    //var fs = document.getElementById('forms');
+                    var fd = new FormData($('#forms')[0]);
+                    $.ajax({
+                        url: "{% url 'affair:processEditAffair' previousedData.affairId %}",
+                        type: "POST",
+                        data: fd,
+                        processData: false,  // 告诉jQuery不要去处理发送的数据
+                        contentType: false,   // 告诉jQuery不要去设置Content-Type请求头
+                        beforeSend: function (xhr, setting) {
+                                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                                //显示
+                                $('#loadingModal').modal({backdrop: 'static', keyboard: false});
+                                $("#loadingModal").modal('show');
+                            },
+                        success: function (data) {
+                            if (data['statusCode'] == '0') {
+                                var delay=5;
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
+                                $('#warningContent').html("<h1>事务修改成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                                $('#warning').modal({backdrop: 'static', keyboard: false});
+                                $('#warning').modal('show');
+                                clock1 = setInterval(function () {
+                                    delay = delay - 1;
+                                    $('#warningContent').html("<h1>事务修改成功</h1><h3>将在"+delay+"s后返回首页</h3>"+"<p4><a href='http://{{ request.META.HTTP_HOST }}'>立即返回</a></p4>");
+                                },1000);
+                                clock2 = setTimeout(function () {
+                                    window.location.replace("http://{{ request.META.HTTP_HOST }}");
+                                },delay*1000);
+                            }
+                            else if (data['statusCode'] == '1') {
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
+                                warning('您的登录有问题，请重新登录');
+                                afterUnlogin();
+                            }
+                            else if (data['statusCode'] == '2') {
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
+                                warning('数据修改失败！');
+                            }
+                            else {
+                                $("#loadingModal").modal('hide');
+                                $("#warning").modal({backdrop: 'static', keyboard: false});
+                                warning('因未知原因，修改失败！');
+                            }
+                        },
+                        error: function() {
+                            $("#loadingModal").modal('hide');
+                            $("#warning").modal({backdrop: 'static', keyboard: false});
+                            //请求出错处理
+                            warning('请求出错');
+                        }
+                    });
+                });
+
+
+            });
+            var FileInput = function () {
+                var oFile = new Object();
+                //初始化fileinput控件（第一次初始化）
+                oFile.Init = function (ctrlName, uploadUrl) {
+                    var control = $('#' + ctrlName);
+                    //初始化上传控件的样式
+                    control.fileinput({
+                        resizeImage : true,
+                        maxImageWidth : 200,
+                        maxImageHeight : 200,
+                        resizePreference : 'width',
+                        language: 'zh', //设置语言
+                        uploadUrl: uploadUrl, //上传的地址
+                        allowedFileExtensions: ['jpg', 'gif', 'png'],//接收的文件后缀
+                        showUpload: false, //是否显示上传按钮
+                        showCaption: false,//是否显示标题
+                        browseClass: "btn btn-primary", //按钮样式
+                        uploadAsync: false,
+                        layoutTemplates: {
+                            // actionDelete:'', //去除上传预览的缩略图中的删除图标
+                            actionUpload: '',//去除上传预览缩略图中的上传图片；
+                            //actionZoom: '',   //去除上传预览缩略图中的查看详情预览的缩略图标。
+                            footer: '<div class="file-thumbnail-footer">\n' +
+                            '<div class="file-caption-name" style="width:{width}">{caption}</div>\n'+'{progress} {actions}\n' +'</div>',
+                        },
+                        //dropZoneEnabled: false,//是否显示拖拽区域
+                        //minImageWidth: 50, //图片的最小宽度
+                        //minImageHeight: 50,//图片的最小高度
+                        //maxImageWidth: 1000,//图片的最大宽度
+                        //maxImageHeight: 1000,//图片的最大高度
+                        //maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
+                        //minFileCount: 0,
+                        maxFileCount: 2, //表示允许同时上传的最大文件个数
+                        enctype: 'multipart/form-data',
+                        validateInitialCount: true,
+                        previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+                        msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                    });
+                    //导入文件上传完成之后的事件
+                    $("#img_file").on("fileuploaded", function (event, data, previewId, index) {
+                        $("#myModal").modal("hide");
+                        var data = data.response.lstOrderImport;
+                        if (data == undefined) {
+                            toastr.error('文件格式类型不正确');
+                            return;
+                        }
+                        //1.初始化表格
+                        var oTable = new TableInit();
+                        oTable.Init(data);
+                        $("#div_startimport").show();
+                    });
+                }
+                return oFile;
+            };
+        </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+    <!--创建事务-->
+    <div class="container">
+        <form id="forms">
+            <div class="form-group">
+                <label for="affairName">事务名称</label>
+                <input type="text" class="form-control" id="affairName" placeholder="JackMa为什么那么强" name="affairName" id="affairName" value="{{ previousedData.affairName }}"/>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="type">类别</label>
+                        <select class="form-control" id="type" name="type">
+                            {% for typeName in typeArray %}
+                                {% if typeName == previousedData.typeName %}
+                                    <option value="{{ typeName }}" selected="selected">{{ typeName }}</option>
+                                {% else %}
+                                    <option value="{{ typeName }}">{{ typeName }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="receiverNum">大概需要人手</label>
+                        <select class="form-control" id="receiverNum" name="receiverNum">
+                            {% for i in num %}
+                                {% if i == previousedData.needReceiverNum %}
+                                    <option value="{{ i }}" selected="selected">{{ i }}</option>
+                                {% else %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                {% endif %}
+
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="reward">酬劳（若为RMB请直接填写数字，否则为物品交换），默认为“0”即无偿</label>
+                        {% if previousedData.rewardType == '0' %}
+                            <input type="text" class="form-control" id="reward" placeholder="例：“一只JackMa”，此自动识别为物品交换" name="reward" value="{{ previousedData.rewardMoney }}"/>
+                        {% else %}
+                            <input type="text" class="form-control" id="reward" placeholder="例：“一只JackMa”，此自动识别为物品交换" name="reward" value="{{ previousedData.rewardThing }}"/>
+                        {% endif %}
+
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="tagSelect">标签（多选）</label>
+                        <br/>
+                        <select data-placeholder="请选择标签" class="chosen-select form-control" multiple=""
+                                style="width:350px;height:34px;" tabindex="4" id="tagSelect" name="tag">
+                            {% for tagName in tagArray %}
+                                {% if tagName in previousedData.tag %}
+                                    <option value="{{ tagName }}" hassubinfo="true" selected="selected">{{ tagName }}</option>
+                                {% else %}
+                                    <option value="{{ tagName }}" hassubinfo="true">{{ tagName }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label for="affairDetail">详细描述</label>
+                <textarea class="form-control" id="affairDetail" rows="6" name="affairDetail">{{ previousedData.affairDetail }}</textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-info" id="uploadImg">上传图片</button>
+                <p class="help-block">上传和你事务相关的图片哦.</p></div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">如果要改图片，就上传哦（暂时限制一张）</h4></div>
+                        <div class="modal-body">
+                            <a href="{% static "picTemplate.png" %}" class="form-control" style="border:none;">下载导入模板</a>
+                            <input type="file" name="img_file" id="img_file" class="file-loading" multiple="multiple" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-lg btn-block" id="affairSubmit">提交</button>
+        </form>
+    </div>
+
+<div class="modal fade" id="loadingModal">
+    <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+        <div class="progress progress-striped active" style="margin-bottom: 0;">
+            <div class="progress-bar" style="width: 100%;"></div>
+        </div>
+        <h5>正在上传...</h5>
+    </div>
+</div>
+
+</body>
+</html>

@@ -12,23 +12,25 @@ class AffairInfo(models.Model):
     tag = models.CharField(max_length=50, null=True, blank=True)
     affairDetail = models.CharField(max_length=500, null=True, blank=True)
     affairCreateTime = models.DateTimeField()
+    lastUpdateTime = models.DateTimeField()
     rewardType = models.CharField(max_length=1, default='0')  # 0代表奖励为钱，1代表是物品
     rewardMoney = models.FloatField(default=0)
     rewardThing = models.CharField(max_length=30, default='nothing')
     needReceiverNum = models.IntegerField()
     receiverNum = models.IntegerField(default=0)
+    statusFlag = models.CharField(max_length=1, default='0')
 
     def __str__(self):
         return self.affairName
 
 
 class AffairImg(models.Model):
-    affair = models.ForeignKey('affair.AffairInfo', on_delete=models.CASCADE)
+    affair = models.ForeignKey('affair.AffairInfo', on_delete=models.DO_NOTHING)
     img = models.ImageField(upload_to='affairImg', max_length=80)
     name = models.CharField(max_length=80)
 
     def __str__(self):
-        return self.affair + self.name
+        return str(self.id)
 
 
 class Affair_AffairReceiver(models.Model):

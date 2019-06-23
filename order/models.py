@@ -12,7 +12,7 @@ class OrderInfo(models.Model):
     refundFlag = models.CharField(max_length=1, default='0')  # '0'为未申请，'1'为申请状态，'2'为退款中，'3'为完成
 
     def __str__(self):
-        return self.orderId+self.affairId
+        return str(self.orderId)
 
 class Order_Account(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -21,5 +21,5 @@ class Order_Account(models.Model):
     affairReceiverId = models.ForeignKey('login.AccountInfo', on_delete=models.CASCADE, related_name='affairReceiverId')
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 

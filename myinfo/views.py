@@ -10,11 +10,12 @@ import pymysql
 
 # Create your views here.
 
+# 总后台显示界面
 def totalInfo(request):
     context = {"typeDic": typeDic}
     return render(request, "myinfo/myinfo.html", context)
 
-
+# 个人详情页面
 def personalInfo(request):
     context = {"typeDic": typeDic}
     results = cookiesVerify(request)
@@ -45,7 +46,7 @@ def personalInfo(request):
         context['statusCode'] = '1'  # 登陆状态异常
         return render(request, "myinfo/personalInfo.html", context)
 
-
+# 修改个人信息的业务逻辑
 def changeBasicInfo(request):
     if request.method == 'POST':
         result = cookiesVerify(request)
@@ -77,11 +78,12 @@ def changeBasicInfo(request):
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
 
-
+# 密码修改页面
 def changePassword(request):
     context = {'typeDic': typeDic}
     return render(request, 'myinfo/changePassword.html', context)
 
+# 修改密码的处理逻辑
 def processPasswordChange(request):
     if request.method == 'POST':
         result = cookiesVerify(request)
@@ -124,6 +126,7 @@ def processPasswordChange(request):
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
 
+# 修改电话号码
 def changePhoneNumber(request):
     context = {"typeDic": typeDic}
     results = cookiesVerify(request)
@@ -153,6 +156,7 @@ def changePhoneNumber(request):
         context['statusCode'] = '1'  # 登陆状态异常
         return render(request, "myinfo/changePhoneNumber.html", context)
 
+# 修改电话的业务逻辑
 def phoneNumberProcess(request):
     if request.method == 'POST':
         result = cookiesVerify(request)
@@ -196,3 +200,20 @@ def phoneNumberProcess(request):
         else:
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
+
+# 自己创建的事务的详细界面
+def myCreatedAffair(request):
+
+    sql = """
+    select affairId, affairName, receiverNum, needReceiverNum, affairCreateTime
+    from affair_affairInfo as info
+    where info.affairProviderId_id = {0}""".format(str(request.COOKIES['id']))
+
+    # 开始在数据库中查找相关内容
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute(sql)
+    data = cursor.fetchall()
+
+    context = {'typeDic':typeDic, 'affairData':data}
+    return render(request, 'myinfo/myCreatedAffair.html', context)

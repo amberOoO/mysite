@@ -11,6 +11,7 @@ urlpatterns = [
     path('processPasswordChange', views.processPasswordChange, name="processPasswordChange"),
     path('changePhoneNumber', views.changePhoneNumber, name="changePhoneNumber"),
     path('phoneNumberProcess', views.phoneNumberProcess, name="phoneNumberProcess"),
+    path('myCreatedAffair', views.myCreatedAffair, name="myCreatedAffair"),
     path('', views.totalInfo, name="totalInfo"),
 ]
 
