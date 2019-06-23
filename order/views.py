@@ -90,10 +90,17 @@ def createOrder(request):
                 sendBack["statusCode"] = "2"
                 return JsonResponse(sendBack)
         else:
-            sql = 'select receiverNum from affair_affairInfo as info where info.affairId={0}'.format(str(affairId))
+            sql = 'select info.receiverNum, info.statusFlag from affair_affairInfo as info where info.affairId={0}'.format(str(affairId))
             cursor.execute(sql)
             numInfo = cursor.fetchone()
-
+            print(numInfo)
+            if(numInfo['statusFlag']=='0'):
+                sql = """
+                update affair_affairInfo as info
+                set info.statusFlag = {0}
+                where info.affairId = {1}""".format(str(1), affairId)
+                cursor.execute(sql)
+                db.commit()
             sendBack["statusCode"] = "4"
             sendBack["receiverNum"] = str(numInfo['receiverNum'])
             db.close()

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, Http404
 from django.core.files.storage import default_storage
 import json
 from django.utils import timezone
@@ -14,6 +14,7 @@ import pymysql
 def totalInfo(request):
     context = {"typeDic": typeDic}
     return render(request, "myinfo/myinfo.html", context)
+
 
 # 个人详情页面
 def personalInfo(request):
@@ -46,6 +47,7 @@ def personalInfo(request):
         context['statusCode'] = '1'  # 登陆状态异常
         return render(request, "myinfo/personalInfo.html", context)
 
+
 # 修改个人信息的业务逻辑
 def changeBasicInfo(request):
     if request.method == 'POST':
@@ -59,7 +61,8 @@ def changeBasicInfo(request):
                 sql = """
                 update login_accountinfo as info
                 set info.nickName = '{0}', info.school = '{1}', info.studentNo = '{2}'
-                where info.id = {3}""".format(str(data['nickName']), str(data['school']), str(data['schoolNumber']), str(request.COOKIES['id']))
+                where info.id = {3}""".format(str(data['nickName']), str(data['school']), str(data['schoolNumber']),
+                                              str(request.COOKIES['id']))
 
                 cursor.execute(sql)
                 db.commit()
@@ -78,10 +81,12 @@ def changeBasicInfo(request):
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
 
+
 # 密码修改页面
 def changePassword(request):
     context = {'typeDic': typeDic}
     return render(request, 'myinfo/changePassword.html', context)
+
 
 # 修改密码的处理逻辑
 def processPasswordChange(request):
@@ -100,7 +105,7 @@ def processPasswordChange(request):
                 cursor.execute(sql)
                 passwd = cursor.fetchone()
                 print(passwd)
-                if(passwd['passwd']==data['rawPwd']):
+                if (passwd['passwd'] == data['rawPwd']):
                     sql = """
                     update login_accountinfo as info
                     set info.passwd = '{0}'
@@ -125,6 +130,7 @@ def processPasswordChange(request):
         else:
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
+
 
 # 修改电话号码
 def changePhoneNumber(request):
@@ -155,6 +161,7 @@ def changePhoneNumber(request):
     else:
         context['statusCode'] = '1'  # 登陆状态异常
         return render(request, "myinfo/changePhoneNumber.html", context)
+
 
 # 修改电话的业务逻辑
 def phoneNumberProcess(request):
@@ -201,11 +208,11 @@ def phoneNumberProcess(request):
             sendBack = {'statusCode': '1'}  # 登陆状态异常
             return JsonResponse(sendBack)
 
+
 # 自己创建的事务的详细界面
 def myCreatedAffair(request):
-
     sql = """
-    select affairId, affairName, receiverNum, needReceiverNum, affairCreateTime
+    select affairId, affairName, receiverNum, needReceiverNum, affairCreateTime, statusFlag
     from affair_affairInfo as info
     where info.affairProviderId_id = {0}""".format(str(request.COOKIES['id']))
 
@@ -214,6 +221,65 @@ def myCreatedAffair(request):
     cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(sql)
     data = cursor.fetchall()
-
-    context = {'typeDic':typeDic, 'affairData':data}
+    context = {'typeDic': typeDic, 'affairData': data}
     return render(request, 'myinfo/myCreatedAffair.html', context)
+
+
+def myReceivedAffair(request):
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+
+    sql = """
+     select *
+    from order_orderInfo, affair_affairInfo
+    where order_orderInfo.orderId in 
+    (
+    select order_order_account.orderId_id
+    from order_order_account
+    where order_order_account.affairReceiverId_id = '{0}'
+    ) and order_orderInfo.affairId = affair_affairInfo.affairId""".format(str(request.COOKIES['id']))
+
+    # 开始在数据库中查找相关内容
+
+    cursor.execute(sql)
+    data = cursor.fetchall()
+
+    context = {'typeDic': typeDic, 'affairData': data}
+    return render(request, 'myinfo/myReceivedAffair.html', context)
+
+def changeAffairStatus(request):
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+
+    data = json.loads(request.body)
+    affairId = data['affairId']
+    print(data)
+
+    # 先判断这个事务是不是这个人创建的
+    sql = """
+    select info.affairProviderId_id, info.statusFlag
+    from affair_affairInfo as info
+    where info.affairId = {0}""".format(str(affairId))
+    cursor.execute(sql)
+    result = cursor.fetchone()
+
+    if(str(result['affairProviderId_id']) != str(request.COOKIES['id'])):
+        return HttpResponseForbidden()
+
+    if(result['statusFlag']=='0'):
+        flag = '2'
+    elif(result['statusFlag']=='2'):
+        flag = '0'
+    else:
+        return Http404()
+
+    sql = """
+    update affair_affairInfo as info
+    set info.statusFlag = {0}
+    where info.affairId = {1}""".format(str(flag),str(affairId))
+    cursor.execute(sql)
+    db.commit()
+
+    db.close()
+    sendBack = {"statusCode": '0'}
+    return JsonResponse(sendBack)

@@ -1,0 +1,44 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+        <!--额外引入-->
+    <script type="text/javascript">
+
+    </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+    <!--主题部分-->
+    <div class="container">
+        <h2>我接受的事务</h2>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <tr>
+                    <th>事务编号</th>
+                    <th>事务名称</th>
+                    <th>接受情况</th>
+                    <th>创建时间</th>
+                    <th>修改事务</th>
+                </tr>
+                {% for data in affairData %}
+                <tr>
+                    <td>{{ data.affairId }}</td>
+                    <td>{{ data.affairName }}</td>
+                    <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
+                    <td>{{ data.affairCreateTime }}</td>
+                    <td><a class="btn btn-primary btn-xs" href="#" role="button" id="{{ data.affairId }}">修改</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+</body>
+</html>

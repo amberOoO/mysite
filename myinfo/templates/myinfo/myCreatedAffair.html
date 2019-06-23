@@ -6,7 +6,38 @@
     {% include "parts/head.html" %}
         <!--额外引入-->
     <script type="text/javascript">
-
+        $(function () {
+            $("td a").click(function () {
+                var data={
+                    'affairId':$(this).parent().siblings().first().html()
+                }
+                $.ajax({
+                    url: "{% url "myinfo:changeAffairStatus" %}",
+                    //请求的url地址
+                    type: "post",
+                    //请求方式
+                    dataType: "json",
+                    //返回格式为json
+                    async: true,
+                    //请求是否异步，默认为异步，这也是ajax重要特性
+                    data: JSON.stringify(data),
+                    //参数值
+                    beforeSend: function (xhr, setting) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                    },
+                    success: function (data) {
+                        window.location.reload()
+                    },
+                    complete: function () {
+                        //请求完成的处理
+                    },
+                    error: function () {
+                        //请求出错处理
+                        warning('请求出错');
+                    }
+                });
+            });
+        })
     </script>
 
 
@@ -32,7 +63,14 @@
                     <td>{{ data.affairName }}</td>
                     <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
                     <td>{{ data.affairCreateTime }}</td>
-                    <td><a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}" role="button" id="{{ data.affairId }}">修改</a></td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}" role="button" id="{{ data.affairId }}">修改</a>
+                        {% if data.statusFlag == '0' %}
+                            <a class="btn btn-warning btn-xs" href="#" role="button" id="changeAffairStatus{{ data.affairId }}">暂停发布</a>
+                        {% elif data.statusFlag == '2' %}
+                            <a class="btn btn-success btn-xs" href="#" role="button" id="changeAffairStatus">继续发布</a>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </table>

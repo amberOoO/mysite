@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.core.files.storage import default_storage
 import json
 from django.utils import timezone
@@ -112,7 +112,17 @@ def affairDisplay(request, affairType):
     sql = "select * from view_affair_type_" + affairType
     cursor.execute(sql)
     affairData = cursor.fetchall()
-    print(affairData)
+    previousId=-1
+
+    # 解决一个事务有多个图片，前台展示时展示多个同样事务的问题
+    for data in affairData:
+        if(data['affairId']!=previousId and data['statusFlag']=='0'):
+            previousId = data['affairId']
+            continue
+        else:
+            affairData.remove(data)
+
+
 
     context = {'affairData': affairData, 'defaultImgPath': 'affairImg/default.png', "typeDic": typeDic,
                'affairType': affairType}
@@ -134,7 +144,7 @@ def createDatabaseView(db, cursor):
                 str(type), str(typeDic[type]))
             cursor.execute(sql)
 
-            sql = "create view view_affair_type_{0} as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_{1} as info left join affair_affairimg as img on info.affairid = img.affair_id)".format(
+            sql = "create view view_affair_type_{0} as (select info.affairId, info.type, info.tag, info.affairDetail, info.affairCreateTime, info.rewardType, info.rewardMoney, info.rewardThing, info.needReceiverNum, info.receiverNum, info.affairProviderId_id, info.statusFlag, info.affairName, img.id, img.img, img.name from view_affair_type_briefInfo_{1} as info left join affair_affairimg as img on info.affairid = img.affair_id)".format(
                 str(type), str(type))
             cursor.execute(sql)
             db.commit()
@@ -172,6 +182,14 @@ def editAffair(request, affairId):
 
     cursor.execute(sql)
     data = cursor.fetchone()
+
+    # 安全检查
+    if(str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
+        print(data['affairProviderId_id'])
+        print(request.COOKIES['id'])
+        context = {"typeDic":typeDic}
+        return HttpResponseForbidden()
+
     needReceiverNum = data['needReceiverNum']
 
     tag = data['tag']
