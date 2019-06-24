@@ -1,9 +1,11 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from .models import *
 from affair.models import *
 from login.models import *
 from django.utils import timezone
+from affair.views import typeDic
+from affair.views import cookiesVerify
 
 import json
 import pymysql
@@ -119,3 +121,100 @@ def createOrder(request):
     sendBack["statusCode"] = "0"
     sendBack["receiverNum"] = str(numInfo['receiverNum'])
     return JsonResponse(sendBack)
+
+def relatedOrder(request, affairId):
+    #验证登录
+    result = cookiesVerify(request)
+    if(result == '0'):
+
+        db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+        cursor = db.cursor(pymysql.cursors.DictCursor)
+
+        # 安全检查，看这事务是否属于该用户
+        sql = '''
+        select *
+        from affair_affairInfo as info
+        where info.affairId = {0}'''.format(str(affairId))
+
+        cursor.execute(sql)
+        data = cursor.fetchone()
+
+        if (str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
+            db.close()
+            print("权限错误")
+            return HttpResponseForbidden()
+
+        # 开始在数据库中查找相关内容
+        sql = """
+        select *
+        from affair_order_receiver_condition as info
+        where info.affairId = {0}""".format(str(affairId))
+
+        cursor.execute(sql)
+        data = cursor.fetchall()
+        print(data)
+
+
+        context = {'typeDic': typeDic, 'orderData': data}
+        return render(request, "order/relatedOrder.html", context)
+
+
+    else:
+        return HttpResponseForbidden()
+
+def orderStatusChange(request):
+    # 验证登录
+    postData = json.loads(request.body)
+    orderId = postData['orderId']
+    result = cookiesVerify(request)
+    if(result == '0'):
+
+        db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+        cursor = db.cursor(pymysql.cursors.DictCursor)
+
+        # 安全检查，看这事务是否属于该用户
+        sql = '''
+        select affairProviderId_id
+        from order_order_account
+        where order_order_account.orderId_id = {0}'''.format(str(orderId))
+
+        cursor.execute(sql)
+        data = cursor.fetchone()
+
+        if (str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
+            db.close()
+            print("权限错误")
+            return HttpResponseForbidden()
+
+        # 开始在数据库中查找相关内容
+
+        # 查看orderStatus
+        sql = """
+        select *
+        from affair_order_receiver_condition as info
+        where info.orderId = {0}""".format(str(orderId))
+
+        cursor.execute(sql)
+        data = cursor.fetchone()
+
+        oldOrderStatus = data['orderStatus']
+        newStatusCode = '2'
+        if(oldOrderStatus != '1'):
+            db.close()
+            sendBack = {'statusCode': '0'}
+            return JsonResponse(sendBack)
+
+        # 修改orderStatus
+        sql = """
+        update affair_order_receiver_condition as info
+        set info.orderStatus = {0}
+        where info.orderId = {1}""".format(str(newStatusCode), str(orderId))
+        cursor.execute(sql)
+        db.commit()
+        db.close
+        sendBack = {'statusCode': '0'}
+        return JsonResponse(sendBack)
+
+    else:
+        return HttpResponseForbidden()
+

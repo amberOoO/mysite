@@ -14,6 +14,7 @@ urlpatterns = [
     path('myCreatedAffair', views.myCreatedAffair, name="myCreatedAffair"),
     path('changeAffairStatus', views.changeAffairStatus, name="changeAffairStatus"),
     path('myReceivedAffair', views.myReceivedAffair, name="myReceivedAffair"),
+    path('changeOrderStatus', views.changeOrderStatus, name="changeOrderStatus"),
     path('', views.totalInfo, name="totalInfo"),
 ]
 

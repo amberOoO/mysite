@@ -4,9 +4,44 @@
 <head>
     {# 引入公共头部#}
     {% include "parts/head.html" %}
-        <!--额外引入-->
+    <!--额外引入-->
     <script type="text/javascript">
+        //orderStatusChange
+        $(function () {
+            $("td button").click(function () {
+                if ($(this).hasClass('btn-warning')) {
+                    var data = {
+                        'orderId': $(this).parent().siblings().first().html()
+                    }
+                    $.ajax({
+                        url: "{% url "myinfo:changeOrderStatus" %}",
+                        //请求的url地址
+                        type: "post",
+                        //请求方式
+                        dataType: "json",
+                        //返回格式为json
+                        async: true,
+                        //请求是否异步，默认为异步，这也是ajax重要特性
+                        data: JSON.stringify(data),
+                        //参数值
+                        beforeSend: function (xhr, setting) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                        },
+                        success: function (data) {
+                            window.location.reload()
+                        },
+                        complete: function () {
+                            //请求完成的处理
+                        },
+                        error: function () {
+                            //请求出错处理
+                            warning('请求出错');
+                        }
+                    });
+                }
 
+            });
+        });
     </script>
 
 
@@ -14,30 +49,62 @@
 <body>
 {% include "parts/nav.html" %}
 
-    <!--主题部分-->
-    <div class="container">
-        <h2>我接受的事务</h2>
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered">
+<!--主题部分-->
+<div class="container">
+    <h2>我接受的事务</h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered">
+            <tr>
+                <th>订单号</th>
+                <th>事务编号</th>
+                <th>事务名称</th>
+                <th>接受情况</th>
+                <th>创建时间</th>
+                <th>订单状态</th>
+                <th>提交</th>
+            </tr>
+            {% for data in affairData %}
                 <tr>
-                    <th>事务编号</th>
-                    <th>事务名称</th>
-                    <th>接受情况</th>
-                    <th>创建时间</th>
-                    <th>修改事务</th>
-                </tr>
-                {% for data in affairData %}
-                <tr>
+                    <td>{{ data.orderId }}</td>
                     <td>{{ data.affairId }}</td>
                     <td>{{ data.affairName }}</td>
                     <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
                     <td>{{ data.affairCreateTime }}</td>
-                    <td><a class="btn btn-primary btn-xs" href="#" role="button" id="{{ data.affairId }}">修改</a></td>
+                    <td>
+                        {% if data.orderStatus == '0' %}
+                            <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                    disabled="disabled">待完成
+                            </button>
+                        {% elif data.orderStatus == '1' %}
+                            <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                    disabled="disabled">
+                                待确认
+                            </button>
+                        {% elif data.orderStatus == '2' %}
+                            <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                    disabled="disabled">已完成
+                            </button>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if data.orderStatus == '0' %}
+                            <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}">提交
+                            </button>
+                        {% elif data.orderStatus == '1' %}
+                            <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                    disabled="disabled">提交
+                            </button>
+                        {% elif data.orderStatus == '2' %}
+                            <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                    disabled="disabled">提交
+                            </button>
+                        {% endif %}
+                    </td>
                 </tr>
-                {% endfor %}
-            </table>
-        </div>
+            {% endfor %}
+        </table>
     </div>
+</div>
 
 
 </body>

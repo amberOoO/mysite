@@ -1,0 +1,98 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    {# 引入公共头部#}
+    {% include "parts/head.html" %}
+    <!--额外引入-->
+    <script type="text/javascript">
+        //orderStatusChange
+        $(function () {
+            $("td button").click(function () {
+                if ($(this).hasClass('btn-warning')) {
+                    var data = {
+                        'orderId': $(this).parent().siblings().first().html()
+                    }
+                    $.ajax({
+                        url: "{% url "order:orderStatusChange" %}",
+                        //请求的url地址
+                        type: "post",
+                        //请求方式
+                        dataType: "json",
+                        //返回格式为json
+                        async: true,
+                        //请求是否异步，默认为异步，这也是ajax重要特性
+                        data: JSON.stringify(data),
+                        //参数值
+                        beforeSend: function (xhr, setting) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                        },
+                        success: function (data) {
+                            window.location.reload();
+                        },
+                        complete: function () {
+                            //请求完成的处理
+                        },
+                        error: function () {
+                            //请求出错处理
+                            warning('请求出错');
+                        }
+                    });
+                }
+
+            });
+        });
+    </script>
+
+
+</head>
+<body>
+{% include "parts/nav.html" %}
+
+<!--主题部分-->
+<div class="container">
+    <h2>事务{{ orderData.0.affairId }}：{{ orderData.0.affairName }}</h2>
+    {% if orderData %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <tr>
+                    <th>订单编号</th>
+                    <th>接受时间</th>
+                    <th>接受人</th>
+                    <th>接受人联系方式</th>
+                    <th>确认完成</th>
+                </tr>
+                {% for data in orderData %}
+                    <tr>
+                        <td>{{ data.orderId }}</td>
+                        <td>{{ data.orderCreateTime }}</td>
+                        <td>{{ data.nickName }}</td>
+                        <td>{{ data.phoneNumber }}</td>
+                        <td>
+                            {% if data.orderStatus == '0' %}
+                                <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                        disabled="disabled">待接受者完成
+                                </button>
+                            {% elif data.orderStatus == '1' %}
+                                <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}">
+                                    确认接受者已完成
+                                </button>
+                            {% elif data.orderStatus == '2' %}
+                                <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                        disabled="disabled">订单已完成
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <h3>emmmm，暂时还没有人接受你的事务哦，请再耐心等等哦</h3>
+    {% endif %}
+
+</div>
+
+
+</body>
+</html>

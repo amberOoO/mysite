@@ -15,6 +15,8 @@ typeDic = {'study': '学习帮助',
            'groupNeed': '组队需求',
            'other': '其他'}
 
+invertTypeDic = dict([(v, k) for (k, v) in typeDic.items()])
+
 typeArray = ['学习帮助', '日常帮助', '闲置物品', '技术帮助', '组队需求', '其他']
 
 tagDic = {'errand': '跑腿',
@@ -116,13 +118,15 @@ def affairDisplay(request, affairType):
 
     # 解决一个事务有多个图片，前台展示时展示多个同样事务的问题
     for data in affairData:
-        if(data['affairId']!=previousId and data['statusFlag']=='0'):
-            previousId = data['affairId']
-            continue
+        if(data['statusFlag']=='0'):
+            if(data['affairId']!=previousId):
+                previousId = data['affairId']
+                continue
         else:
             affairData.remove(data)
 
-
+    db.commit()
+    db.close()
 
     context = {'affairData': affairData, 'defaultImgPath': 'affairImg/default.png', "typeDic": typeDic,
                'affairType': affairType}
@@ -149,6 +153,8 @@ def createDatabaseView(db, cursor):
             cursor.execute(sql)
             db.commit()
         except Exception as e:
+            db.rollback()
+            db.close()
             print("创建视图错误：\n" + str(e))
 
 
@@ -167,7 +173,21 @@ def affairDetail(request, affairType, affairId):
         imgArray.append(temp)
 
     print(affairData[0]['needReceiverNum'])
-    context = {'affairData': affairData[0], 'imgArray': imgArray, "typeDic": typeDic}
+
+
+    # 评论信息
+    sql = """
+    select login_accountInfo.nickName as 'nickName', discuss_discuss.content as 'content', discuss_discuss.createTime as createTime 
+    from discuss_discuss, discuss_discuss_account, login_accountInfo
+    where discuss_discuss.id = discuss_discuss_account.discussId_id and discuss_discuss.affairId_id = {0} and login_accountInfo.id = discuss_discuss_account.createrId""".format(str(affairId))
+
+    cursor.execute(sql)
+    discussContent = cursor.fetchall()
+    print(discussContent)
+
+    db.commit()
+    db.close()
+    context = {'affairData': affairData[0], 'imgArray': imgArray, "typeDic": typeDic, "discussContent": discussContent}
     return render(request, 'affair/affairDetail.html', context)
 
 
@@ -183,7 +203,7 @@ def editAffair(request, affairId):
     cursor.execute(sql)
     data = cursor.fetchone()
 
-    # 安全检查
+    # 安全检查，看这事务是否属于该用户
     if(str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
         print(data['affairProviderId_id'])
         print(request.COOKIES['id'])

@@ -10,6 +10,8 @@
     <!--额外引入-->
     <script type="text/javascript">
         $(function () {
+
+
             $('#getAffair').click(function () {
                 var data = {
                     'receiverId': $.cookie('id'),
@@ -60,7 +62,55 @@
 
 
             });
+
+            $("#discussSubmit").click(function (e) {
+                e.preventDefault();
+                if (!$("#discussContent").val()) {
+                    warning('为空不能提交哦！');
+                } else {
+                    var data = {
+                        'discussContent': $("#discussContent").val(),
+                        'affairId':{{ affairData.affairId }}
+                    }
+                    $.ajax({
+                        url: "{% url "discuss:discussProcess" %}",
+                        //请求的url地址
+                        type: "post",
+                        //请求方式
+                        dataType: "json",
+                        //返回格式为json
+                        async: true,
+                        //请求是否异步，默认为异步，这也是ajax重要特性
+                        data: JSON.stringify(data),
+                        //参数值
+                        beforeSend: function (xhr, setting) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                        },
+                        success: function (data) {
+                            if (data['statusCode'] == '0') {
+                                warning('接受成功');
+                                $("#receiverNum").html(data['receiverNum']);
+                            } else if (data['statusCode'] == '1') {
+                                warning('评论失败');
+                            }
+
+
+                        },
+                        complete: function () {
+                            //请求完成的处理
+                        },
+                        error: function () {
+                            //请求出错处理
+                            warning('请求出错');
+                        }
+                    });
+                }
+            })
+
+
         });
+
+
     </script>
 
 </head>
@@ -185,7 +235,8 @@
             </div>
 
 
-            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg" id="getAffair">能帮上忙？那就快快帮帮他吧！
+            <button type="button" class="btn btn-default btn-block btn-primary  btn-lg" id="getAffair" href="#">
+                能帮上忙？那就快快帮帮他吧！
             </button>
         </div>
     </div>
@@ -211,13 +262,47 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="detail">
                         <h3>
+
                             {{ affairData.affairDetail }}
                         </h3>
                     </div>
                     <div class="tab-pane" id="comment">
-                        <h3>
-                            占位
-                        </h3>
+
+
+                        <caption>回帖区</caption>
+                        {% if discussContent %}
+                            {% for data in discussContent %}
+                                {#                                    <tr>#}
+                                {#                                        <td rowspan="3">占位</td>#}
+                                {#                                        <td>昵称:{{ data.nickName }}</td>#}
+                                {#                                    </tr>#}
+                                {#                                    <tr>#}
+                                {#                                        <td height="160px">{{ data.content }}</td>#}
+                                {#                                    </tr>#}
+                                {#                                    <tr>#}
+                                {#                                        <td>{{ data.createTime }}</td>#}
+                                {#                                    </tr>#}
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">昵称:{{ data.nickName }}</div>
+                                    <div class="panel-body">
+                                        {{ data.content }}
+                                    </div>
+                                    <div class="panel-footer">{{ data.createTime }}</div>
+                                </div>
+
+                            {% endfor %}
+                        {% else %}
+                            <h3>暂时还没有讨论哦，快来抢沙发！</h3>
+                        {% endif %}
+
+                        <form>
+                            <div class="form-group">
+                                <label for="discussContent">参与讨论</label>
+                                <textarea class="form-control" rows="5" id="discussContent"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="discussSubmit">提交</button>
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -225,7 +310,30 @@
 
     </div>
 </div>
-
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 </body>
 </html>

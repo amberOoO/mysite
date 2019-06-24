@@ -4,12 +4,12 @@
 <head>
     {# 引入公共头部#}
     {% include "parts/head.html" %}
-        <!--额外引入-->
+    <!--额外引入-->
     <script type="text/javascript">
         $(function () {
-            $("td a").click(function () {
-                var data={
-                    'affairId':$(this).parent().siblings().first().html()
+            $("td button").click(function () {
+                var data = {
+                    'affairId': $(this).parent().siblings().first().html()
                 }
                 $.ajax({
                     url: "{% url "myinfo:changeAffairStatus" %}",
@@ -45,37 +45,56 @@
 <body>
 {% include "parts/nav.html" %}
 
-    <!--主题部分-->
-    <div class="container">
-        <h2>我创建的事务</h2>
+<!--主题部分-->
+<div class="container">
+    <h2>我创建的事务</h2>
+    {% if affairData %}
         <div class="table-responsive">
             <table class="table table-hover table-striped table-bordered">
+
                 <tr>
                     <th>事务编号</th>
                     <th>事务名称</th>
                     <th>接受情况</th>
                     <th>创建时间</th>
+                    <th>订单查看</th>
                     <th>修改事务</th>
                 </tr>
+
                 {% for data in affairData %}
-                <tr>
-                    <td>{{ data.affairId }}</td>
-                    <td>{{ data.affairName }}</td>
-                    <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
-                    <td>{{ data.affairCreateTime }}</td>
-                    <td>
-                        <a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}" role="button" id="{{ data.affairId }}">修改</a>
-                        {% if data.statusFlag == '0' %}
-                            <a class="btn btn-warning btn-xs" href="#" role="button" id="changeAffairStatus{{ data.affairId }}">暂停发布</a>
-                        {% elif data.statusFlag == '2' %}
-                            <a class="btn btn-success btn-xs" href="#" role="button" id="changeAffairStatus">继续发布</a>
-                        {% endif %}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ data.affairId }}</td>
+                        <td>
+                            <a href="{% url "affair:affairDetail" data.typeEnglish data.affairId %}">{{ data.affairName }}</a>
+                        </td>
+                        <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
+                        <td>{{ data.affairCreateTime }}</td>
+                        <td><a class="btn btn-primary btn-xs" href="{% url "order:relatedOrder" data.affairId %}"
+                               role="button" id="{{ data.affairId }}">查看订单</a></td>
+                        <td>
+                            <a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}"
+                               role="button" id="{{ data.affairId }}">修改</a>
+
+                            {% if data.statusFlag == '0' %}
+                                <button class="btn btn-warning btn-xs" href="#" type="submit"
+                                        id="changeAffairStatus{{ data.affairId }}">暂停发布
+                                </button>
+                            {% elif data.statusFlag == '2' %}
+                                <button class="btn btn-success btn-xs" href="#" type="submit"
+                                        id="changeAffairStatus{{ data.affairId }}">继续发布
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
+
+
             </table>
         </div>
-    </div>
+    {% else %}
+        <h3>emmmm，你还没有创建事务哦，<a href="{% url "affair:createAffair" %}">快试试把！</a></h3>
+    {% endif %}
+</div>
 
 
 </body>
