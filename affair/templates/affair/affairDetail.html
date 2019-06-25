@@ -143,7 +143,7 @@
                 {% endfor %}
 
                 <div class="carousel-inner">
-                    {% if not imgArray %}
+                    {% if not imgArray.0.img %}
                         <div class="item active">
                             <img alt="" src="/media/affairImg/default.png" class="img-responsive center-block"
                                  style="height:300px"/>
@@ -152,11 +152,11 @@
                                     事务展示
                                 </h4>
                                 <p>
-                                    {{ img.name }}
+                                    default.png
                                 </p>
                             </div>
                         </div>
-                    {% endif %}
+                    {% else %}
                     {% for img in imgArray %}
                         {% if forloop.counter0 == 0 %}
                             <div class="item active">
@@ -185,8 +185,8 @@
                                 </div>
                             </div>
                         {% endif %}
-
                     {% endfor %}
+                    {% endif %}
 
                 </div>
 

@@ -174,7 +174,7 @@ def affairDetail(request, affairType, affairId):
         temp = {'img': img['img'], 'name': img['name']}
         imgArray.append(temp)
 
-    print(affairData[0]['needReceiverNum'])
+    print(imgArray)
 
     # 评论信息
     sql = """
