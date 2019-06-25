@@ -124,9 +124,12 @@ def affairDisplay(request, affairType):
             if (data['affairId'] != previousId):
                 previousId = data['affairId']
                 continue
+            else:
+                affairData.remove(data)
+
         else:
             affairData.remove(data)
-
+    print(affairData)
     db.commit()
     db.close()
 
