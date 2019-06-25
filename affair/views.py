@@ -50,58 +50,60 @@ def processSubmit(request):
 
         if (result == '0'):  # 密码认证正确
             accountInfo = AccountInfo.objects.get(phoneNumber=request.COOKIES['phoneNumber'])
-            print(accountInfo.phoneNumber)
 
-            affairInfo = AffairInfo(affairProviderId=accountInfo,
-                                    type=data['type'],
-                                    affairName=data['affairName'],
-                                    affairDetail=data['affairDetail'],
-                                    affairCreateTime=timezone.now(),
-                                    lastUpdateTime=timezone.now(),
-                                    needReceiverNum=int(data['receiverNum'][0])
-                                    )
 
-            if (data['reward'] == ''):
-                affairInfo.rewardType = '0'
-                affairInfo.rewardMoney = 0
+
+        affairInfo = AffairInfo(affairProviderId=accountInfo,
+                                type=data['type'],
+                                affairName=data['affairName'],
+                                affairDetail=data['affairDetail'],
+                                affairCreateTime=timezone.now(),
+                                lastUpdateTime=timezone.now(),
+                                needReceiverNum=int(data['receiverNum'])
+                                )
+
+        if (data['reward'] == ''):
+            affairInfo.rewardType = '0'
+            affairInfo.rewardMoney = 0
+        else:
+            judge = '0'  # 0代表全是数字，则判断酬劳为RMB
+            for c in data['reward']:
+                if ((c <= '0' or c >= '9') and c != '.'):
+                    judge = '1'
+                    break
+            affairInfo.rewardType = '0'
+            if (judge == '0'):
+                affairInfo.rewardMoney = float(data['reward'])
+                print(float(data['reward']))
             else:
-                judge = '0'  # 0代表全是数字，则判断酬劳为RMB
-                for c in data['reward']:
-                    if ((c <= '0' or c >= '9') and c != '.'):
-                        judge = '1'
-                        break
-                affairInfo.rewardType = '0'
-                if (judge == '0'):
-                    affairInfo.rewardMoney = float(data['reward'])
-                    print(float(data['reward']))
-                else:
-                    affairInfo.rewardType = '1'
-                    affairInfo.rewardThing = data['reward']
+                affairInfo.rewardType = '1'
+                affairInfo.rewardThing = data['reward']
 
-            print(data.getlist('tag'))
-            temp = ''
-            for tag in data.getlist('tag'):  # 里边会有多个标签
-                temp = temp + tag + ';'
-            affairInfo.tag = temp
-            affairInfo.save()
+        print(data.getlist('tag'))
+        temp = ''
+        for tag in data.getlist('tag'):  # 里边会有多个标签
+            temp = temp + tag + ';'
+        affairInfo.tag = temp
+        affairInfo.save()
 
-            count = 0
-            for imgFile in request.FILES.getlist('img_file'):
-                count = count + 1
-                new_img = affairInfo.affairimg_set.create(
-                    img=imgFile,
-                    name=imgFile.name
-                )
-            sendBack = {'statusCode': '0'}
-            return JsonResponse(sendBack)
-
-        if (result == '1' or result == '2'):
-            sendBack = {'statusCode': result}
-            return JsonResponse(sendBack)
-        sendBack = {'statusCode': '3'}
+        count = 0
+        for imgFile in request.FILES.getlist('img_file'):
+            count = count + 1
+            new_img = affairInfo.affairimg_set.create(
+                img=imgFile,
+                name=imgFile.name
+            )
+        sendBack = {'statusCode': '0'}
         return JsonResponse(sendBack)
 
+    if (result == '1' or result == '2'):
+        sendBack = {'statusCode': result}
+        return JsonResponse(sendBack)
+
+    sendBack = {'statusCode': '3'}
     return JsonResponse(sendBack)
+
+
 
 
 def affairDisplay(request, affairType):
@@ -114,12 +116,12 @@ def affairDisplay(request, affairType):
     sql = "select * from view_affair_type_" + affairType
     cursor.execute(sql)
     affairData = cursor.fetchall()
-    previousId=-1
+    previousId = -1
 
     # 解决一个事务有多个图片，前台展示时展示多个同样事务的问题
     for data in affairData:
-        if(data['statusFlag']=='0'):
-            if(data['affairId']!=previousId):
+        if (data['statusFlag'] == '0'):
+            if (data['affairId'] != previousId):
                 previousId = data['affairId']
                 continue
         else:
@@ -174,12 +176,12 @@ def affairDetail(request, affairType, affairId):
 
     print(affairData[0]['needReceiverNum'])
 
-
     # 评论信息
     sql = """
     select login_accountInfo.nickName as 'nickName', discuss_discuss.content as 'content', discuss_discuss.createTime as createTime 
     from discuss_discuss, discuss_discuss_account, login_accountInfo
-    where discuss_discuss.id = discuss_discuss_account.discussId_id and discuss_discuss.affairId_id = {0} and login_accountInfo.id = discuss_discuss_account.createrId""".format(str(affairId))
+    where discuss_discuss.id = discuss_discuss_account.discussId_id and discuss_discuss.affairId_id = {0} and login_accountInfo.id = discuss_discuss_account.createrId""".format(
+        str(affairId))
 
     cursor.execute(sql)
     discussContent = cursor.fetchall()
@@ -204,10 +206,10 @@ def editAffair(request, affairId):
     data = cursor.fetchone()
 
     # 安全检查，看这事务是否属于该用户
-    if(str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
+    if (str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
         print(data['affairProviderId_id'])
         print(request.COOKIES['id'])
-        context = {"typeDic":typeDic}
+        context = {"typeDic": typeDic}
         return HttpResponseForbidden()
 
     needReceiverNum = data['needReceiverNum']
