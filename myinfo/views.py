@@ -245,9 +245,14 @@ def myReceivedAffair(request):
     ) and order_orderInfo.affairId = affair_affairInfo.affairId""".format(str(request.COOKIES['id']))
 
     # 开始在数据库中查找相关内容
-
     cursor.execute(sql)
     data = cursor.fetchall()
+    for affair in data:
+        typeChiness = affair['type']
+        typeEnglish = invertTypeDic[typeChiness]
+        affair['typeEnglish'] = typeEnglish
+    context = {'typeDic': typeDic, 'affairData': data}
+    print(data)
     context = {'typeDic': typeDic, 'affairData': data}
     return render(request, 'myinfo/myReceivedAffair.html', context)
 

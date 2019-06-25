@@ -67,7 +67,7 @@
                 <tr>
                     <td>{{ data.orderId }}</td>
                     <td>{{ data.affairId }}</td>
-                    <td>{{ data.affairName }}</td>
+                    <td><a href="{% url 'affair:affairDetail' data.typeEnglish data.affairId %}">{{ data.affairName }}</a></td>
                     <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
                     <td>{{ data.affairCreateTime }}</td>
                     <td>

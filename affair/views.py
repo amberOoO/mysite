@@ -213,6 +213,7 @@ def editAffair(request, affairId):
         return HttpResponseForbidden()
 
     needReceiverNum = data['needReceiverNum']
+    receiverNum = data['receiverNum']
 
     tag = data['tag']
     tag = tag.split(';')
@@ -221,12 +222,12 @@ def editAffair(request, affairId):
 
     num = []
     temp = 1
-    for i in range(10):
-        if (i < needReceiverNum):
+    for i in range(1,11):
+        temp = temp * 2
+        if (temp < receiverNum):
+            print(temp)
             continue
         num.append(temp)
-        temp = temp * 2
-
     context = {'typeDic': typeDic, 'typeArray': typeArray, 'num': num, 'tagArray': tagArray}
     context['previousedData'] = data
 
@@ -278,14 +279,14 @@ def processEditAffair(request, affairId):
             sql = """
                     update affair_affairInfo as info
                     set info.affairName = '{0}', info.needReceiverNum = {1}, info.tag = '{2}', info.affairDetail = '{3}', info.type = '{4}', info.rewardType = '{5}', info.rewardMoney = {6}, info.rewardThing = '{7}'
-                    where info.affairId = {5}""".format(str(affairName), str(needReceiverNum),
+                    where info.affairId = {8}""".format(str(affairName), str(needReceiverNum),
                                                         str(affairDetail), str(affairDetail), str(affairType),
                                                         str(rewardType), str(rewardMoney), str(rewardThing),
                                                         str(affairId))
             print(sql)
             cursor.execute(sql)
+            db.commit()
             if (request.FILES.getlist('img_file')):
-                print("进来了？？？？")
                 affairInfo = AffairInfo.objects.get(affairId=affairId)
                 previousImg = AffairImg.objects.filter(affair_id=4)
                 for img in previousImg:
@@ -296,7 +297,6 @@ def processEditAffair(request, affairId):
                         img=imgFile,
                         name=imgFile.name
                     )
-            db.commit()
             db.close()
             sendBack = {"statusCode": "0"}
             return JsonResponse(sendBack)
