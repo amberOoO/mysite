@@ -24,7 +24,7 @@ def createOrder(request):
         sendBack["statusCode"] = "1"
         return JsonResponse(sendBack)
 
-    receiverId = data['receiverId']
+    receiverId = request.COOKIES['id']
     providerId = data['providerId']
     affairId = data['affairId']
     try:
@@ -36,7 +36,7 @@ def createOrder(request):
         return JsonResponse(sendBack)
 
     try:
-        sql = 'select receiverNum, needReceiverNum from affair_affairInfo as info where info.affairId=' + str(affairId)
+        sql = 'select receiverNum, needReceiverNum from affair_affairInfo as info where info.affairId={0}'.format(affairId)
         cursor.execute(sql)
         numInfo = cursor.fetchone()
         print(numInfo)
