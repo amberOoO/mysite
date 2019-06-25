@@ -113,7 +113,7 @@ def affairDisplay(request, affairType):
     createDatabaseView(db, cursor)
 
     # 开始正式查询相关类别的数据
-    sql = "select * from view_affair_type_" + affairType
+    sql = "select * from view_affair_type_{0} ORDER BY affairCreateTime DESC".format(str(affairType))
     cursor.execute(sql)
     affairData = cursor.fetchall()
     previousId = -1
