@@ -82,6 +82,21 @@ def createOrder(request):
                 where affairInfo.affairId = {0}""".format(str(affairId))
                 cursor.execute(sql)
 
+                if(numInfo['receiverNum'] == numInfo['needReceiverNum']-1):
+                    sql = 'select info.receiverNum, info.statusFlag from affair_affairInfo as info where info.affairId={0}'.format(
+                        str(affairId))
+                    cursor.execute(sql)
+                    numInfo = cursor.fetchone()
+                    print(numInfo)
+                    if (numInfo['statusFlag'] == '0'):
+                        sql = """
+                        update affair_affairInfo as info
+                        set info.statusFlag = {0}
+                        where info.affairId = {1}""".format(str(1), affairId)
+                        cursor.execute(sql)
+                        db.commit()
+
+
                 db.commit()
                 #print('\n\n\n\n????\n\n\n\n')
 

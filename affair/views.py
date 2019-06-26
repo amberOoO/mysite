@@ -211,8 +211,6 @@ def editAffair(request, affairId):
 
     # 安全检查，看这事务是否属于该用户
     if (str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
-        print(data['affairProviderId_id'])
-        print(request.COOKIES['id'])
         context = {"typeDic": typeDic}
         return HttpResponseForbidden()
 
@@ -220,6 +218,7 @@ def editAffair(request, affairId):
     receiverNum = data['receiverNum']
 
     if((receiverNum < needReceiverNum) and (data['statusFlag']=='1')):
+        print('进入修改')
         sql = """
         update affair_affairInfo as info
         set info.statusFlag = '{0}'
@@ -289,6 +288,7 @@ def processEditAffair(request, affairId):
                     rewardThing = data['reward']
                     rewardMoney = 0
 
+
             sql = """
                     update affair_affairInfo as info
                     set info.affairName = '{0}', info.needReceiverNum = {1}, info.tag = '{2}', info.affairDetail = '{3}', info.type = '{4}', info.rewardType = '{5}', info.rewardMoney = {6}, info.rewardThing = '{7}'
@@ -296,9 +296,25 @@ def processEditAffair(request, affairId):
                                                         str(affairDetail), str(affairDetail), str(affairType),
                                                         str(rewardType), str(rewardMoney), str(rewardThing),
                                                         str(affairId))
-            print(sql)
+
             cursor.execute(sql)
             db.commit()
+            sql = """
+            select needReceiverNum, receiverNum, statusFlag
+            from affair_affairInfo
+            where affairId = {0}""".format(str(affairId))
+
+            cursor.execute(sql)
+            info = cursor.fetchone()
+
+            if(info['statusFlag'] == '1') and (info['needReceiverNum']>info['receiverNum']):
+                sql = """
+                update affair_affairInfo
+                set statusFlag = {0}
+                where affairId = {1}""".format(str(0), str(affairId))
+                cursor.execute(sql)
+                db.commit()
+
             if (request.FILES.getlist('img_file')):
                 affairInfo = AffairInfo.objects.get(affairId=affairId)
                 previousImg = AffairImg.objects.filter(affair_id=4)
