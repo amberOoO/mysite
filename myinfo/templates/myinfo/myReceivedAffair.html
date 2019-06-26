@@ -67,39 +67,56 @@
                 <tr>
                     <td>{{ data.orderId }}</td>
                     <td>{{ data.affairId }}</td>
-                    <td><a href="{% url 'affair:affairDetail' data.typeEnglish data.affairId %}">{{ data.affairName }}</a></td>
+                    <td>
+                        <a href="{% url 'affair:affairDetail' data.typeEnglish data.affairId %}">{{ data.affairName }}</a>
+                    </td>
                     <td>{{ data.receiverNum }}/{{ data.needReceiverNum }}</td>
                     <td>{{ data.affairCreateTime }}</td>
                     <td>
-                        {% if data.orderStatus == '0' %}
-                            <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
-                                    disabled="disabled">待完成
-                            </button>
-                        {% elif data.orderStatus == '1' %}
-                            <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}"
-                                    disabled="disabled">
-                                待确认
-                            </button>
-                        {% elif data.orderStatus == '2' %}
-                            <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
-                                    disabled="disabled">已完成
-                            </button>
+                        {% if data.statusFlag == '3' %}
+                            <a class="btn btn-success btn-xs disabled" href="#"
+                               role="button" id="{{ data.affairId }}">事务已删除</a>
+                            </td>
+                            <td>
+                                <a class="btn btn-success btn-xs disabled" href="#"
+                                   role="button" id="{{ data.affairId }}">事务已删除</a>
+
+                            </td>
+                        {% else %}
+                            {% if data.orderStatus == '0' %}
+                                <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                        disabled="disabled">待完成
+                                </button>
+                            {% elif data.orderStatus == '1' %}
+                                <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                        disabled="disabled">
+                                    待确认
+                                </button>
+                            {% elif data.orderStatus == '2' %}
+                                <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
+                                        disabled="disabled">已完成
+                                </button>
+                            {% endif %}
+                            </td>
+                            <td>
+                                {% if data.orderStatus == '0' %}
+                                    <button class="btn btn-warning btn-xs " href="#" type="submit"
+                                            id="{{ data.affairId }}">提交
+                                    </button>
+                                {% elif data.orderStatus == '1' %}
+                                    <button class="btn btn-default btn-xs " href="#" type="submit"
+                                            id="{{ data.affairId }}"
+                                            disabled="disabled">提交
+                                    </button>
+                                {% elif data.orderStatus == '2' %}
+                                    <button class="btn btn-success btn-xs " href="#" type="submit"
+                                            id="{{ data.affairId }}"
+                                            disabled="disabled">提交
+                                    </button>
+                                {% endif %}
+                            </td>
                         {% endif %}
-                    </td>
-                    <td>
-                        {% if data.orderStatus == '0' %}
-                            <button class="btn btn-warning btn-xs " href="#" type="submit" id="{{ data.affairId }}">提交
-                            </button>
-                        {% elif data.orderStatus == '1' %}
-                            <button class="btn btn-default btn-xs " href="#" type="submit" id="{{ data.affairId }}"
-                                    disabled="disabled">提交
-                            </button>
-                        {% elif data.orderStatus == '2' %}
-                            <button class="btn btn-success btn-xs " href="#" type="submit" id="{{ data.affairId }}"
-                                    disabled="disabled">提交
-                            </button>
-                        {% endif %}
-                    </td>
+
                 </tr>
             {% endfor %}
         </table>

@@ -72,17 +72,27 @@
                         <td><a class="btn btn-primary btn-xs" href="{% url "order:relatedOrder" data.affairId %}"
                                role="button" id="{{ data.affairId }}">查看订单</a></td>
                         <td>
-                            <a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}"
-                               role="button" id="{{ data.affairId }}">修改</a>
+                            {% if data.statusFlag == '3' %}
+                                <a class="btn btn-success btn-xs disabled" href="#"
+                                   role="button" id="{{ data.affairId }}">事务已删除</a>
+                            {% else %}
+                                <a class="btn btn-primary btn-xs" href="{% url "affair:editAffair" data.affairId %}"
+                                   role="button" id="{{ data.affairId }}">修改</a>
 
-                            {% if data.statusFlag == '0' %}
-                                <button class="btn btn-warning btn-xs" href="#" type="submit"
-                                        id="changeAffairStatus{{ data.affairId }}">暂停发布
-                                </button>
-                            {% elif data.statusFlag == '2' %}
-                                <button class="btn btn-success btn-xs" href="#" type="submit"
-                                        id="changeAffairStatus{{ data.affairId }}">继续发布
-                                </button>
+                                {% if data.statusFlag == '0' %}
+                                    <button class="btn btn-warning btn-xs" href="#" type="submit"
+                                            id="changeAffairStatus{{ data.affairId }}">暂停发布
+                                    </button>
+                                {% elif data.statusFlag == '2' %}
+                                    <button class="btn btn-success btn-xs" href="#" type="submit"
+                                            id="changeAffairStatus{{ data.affairId }}">继续发布
+                                    </button>
+                                {% endif %}
+                                {% if data.statusFlag != '3' %}
+                                    <a class="btn btn-danger btn-xs"
+                                       href="{% url "affair:deleteAffair" data.affairId %}"
+                                       role="button" id="{{ data.affairId }}">删除事务</a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

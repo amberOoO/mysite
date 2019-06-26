@@ -45,7 +45,6 @@ def cookiesVerify(data):
 
 def register(request):
     data = json.loads(request.body)
-    print(data)
     passwd = data['pwd']
 
     try:
@@ -62,3 +61,5 @@ def register(request):
         except:
             sendBack = {'statusCode': '1', 'content': '注册失败'}
             return JsonResponse(sendBack)
+
+

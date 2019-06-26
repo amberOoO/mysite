@@ -113,11 +113,12 @@ def affairDisplay(request, affairType):
     createDatabaseView(db, cursor)
 
     # 开始正式查询相关类别的数据
-    sql = "select * from view_affair_type_{0} ORDER BY affairCreateTime DESC".format(str(affairType))
+    sql = "select * from view_affair_type_{0} where statusFlag = '0' ORDER BY affairCreateTime DESC".format(str(affairType))
     cursor.execute(sql)
     affairData = cursor.fetchall()
     previousId = -1
 
+    print(affairData)
     # 解决一个事务有多个图片，前台展示时展示多个同样事务的问题
     for data in affairData:
         if (data['statusFlag'] == '0'):
@@ -166,7 +167,7 @@ def createDatabaseView(db, cursor):
 def affairDetail(request, affairType, affairId):
     db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    sql = 'select * from view_affair_type_' + str(affairType) + ' as info where info.affairId = ' + str(affairId)
+    sql = "select * from view_affair_type_{0} as info where info.affairId = {1}".format(str(affairType),str(affairId))
     cursor.execute(sql)
     affairData = cursor.fetchall()
 
@@ -218,10 +219,19 @@ def editAffair(request, affairId):
     needReceiverNum = data['needReceiverNum']
     receiverNum = data['receiverNum']
 
+    if((receiverNum < needReceiverNum) and (data['statusFlag']=='1')):
+        sql = """
+        update affair_affairInfo as info
+        set info.statusFlag = '{0}'
+        where info.affairId = {1}""".format(str(0),str(affairId))
+        cursor.execute(sql)
+        db.commit()
+
     tag = data['tag']
     tag = tag.split(';')
     tag.pop()
     data['tag'] = tag
+
 
     num = []
     temp = 1
@@ -313,6 +323,39 @@ def processEditAffair(request, affairId):
     else:
         sendBack = {"statusCode": "1"}
         return JsonResponse(sendBack)
+
+
+def deleteAffair(request, affairId):
+    db = pymysql.connect('127.0.0.1', 'root', '522087905', 'mysite')
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+
+    sql = '''
+    select *
+    from affair_affairInfo as info
+    where info.affairId = {0}'''.format(str(affairId))
+
+    cursor.execute(sql)
+    data = cursor.fetchone()
+
+    # 安全检查，看这事务是否属于该用户
+    if (str(request.COOKIES['id']) != str(data['affairProviderId_id'])):
+        print(data['affairProviderId_id'])
+        print(request.COOKIES['id'])
+        context = {"typeDic": typeDic}
+        return HttpResponseForbidden()
+
+    sql = """
+    update affair_affairInfo as info
+    set info.statusFlag = '{0}'
+    where info.affairId = {1}""".format(str(3),str(affairId))
+    cursor.execute(sql)
+    db.commit()
+
+    context = {'typeDic': typeDic, 'typeArray': typeArray, 'tagArray': tagArray}
+    context['previousedData'] = data
+
+    db.close()
+    return render(request, "myinfo/myinfo.html", context)
 
 
 class MyError(Exception):  # 定义一个异常类，继承Exception
